@@ -1,5 +1,11 @@
 {
 	"name": "databricks-ls-poc-datafactory",
+	"properties": {
+		"globalConfigurations": {
+			"factoryStagingLSReferenceName": "databrickslspocsa",
+			"factoryStagingLSType": "LinkedServiceReference"
+		}
+	},
 	"location": "koreacentral",
 	"identity": {
 		"type": "SystemAssigned",
