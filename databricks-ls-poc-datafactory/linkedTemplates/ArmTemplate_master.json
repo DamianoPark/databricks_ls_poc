@@ -1,0 +1,189 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory 이름",
+			"defaultValue": "databricks-ls-poc-datafactory"
+		},
+		"ERP_ERPPROD_password": {
+			"type": "secureString",
+			"metadata": "'ERP_ERPPROD'의 'password'에 대한 보안 문자열"
+		},
+		"LS_NAS_password": {
+			"type": "secureString",
+			"metadata": "'LS_NAS'의 'password'에 대한 보안 문자열"
+		},
+		"PMS_CPMS_password": {
+			"type": "secureString",
+			"metadata": "'PMS_CPMS'의 'password'에 대한 보안 문자열"
+		},
+		"RMS_wcadmin_password": {
+			"type": "secureString",
+			"metadata": "'RMS_wcadmin'의 'password'에 대한 보안 문자열"
+		},
+		"databrickslspocsa_accountKey": {
+			"type": "secureString",
+			"metadata": "'databrickslspocsa'의 'accountKey'에 대한 보안 문자열"
+		},
+		"syndpdatawarehouse_password": {
+			"type": "secureString",
+			"metadata": "'syndpdatawarehouse'의 'password'에 대한 보안 문자열"
+		},
+		"ERP_ERPPROD_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "165.244.241.132:1601/ERPPROD"
+		},
+		"ERP_ERPPROD_properties_typeProperties_username": {
+			"type": "string",
+			"defaultValue": "LSISDATALAKE"
+		},
+		"LS_NAS_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "\\\\165.243.101.217\\data"
+		},
+		"LS_NAS_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "busan_fat"
+		},
+		"PMS_CPMS_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "10.153.3.90"
+		},
+		"PMS_CPMS_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "CPMS"
+		},
+		"PMS_CPMS_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "LSDPS"
+		},
+		"RMS_wcadmin_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "165.243.100.125"
+		},
+		"RMS_wcadmin_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "wcadmin"
+		},
+		"RMS_wcadmin_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "LSDPS"
+		},
+		"databrickslspocsa_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
+		},
+		"syndpdatawarehouse_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "synw-datawarehouse-prod-001.sql.azuresynapse.net"
+		},
+		"syndpdatawarehouse_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "syndpdatawarehouse"
+		},
+		"syndpdatawarehouse_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "LSESNOWFLAKE"
+		},
+		"ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/6964c315-93f4-43ed-9c55-ab9ff3d37dc3/resourcegroups/DataPlatform/providers/Microsoft.DataFactory/factories/ls-dp-adf/integrationruntimes/ls-dp-adf-ir-new"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "스토리지 계정 연결 된 ARM 서식 파일을 포함 하는 URI입니다."
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "연결된 ARM 템플릿을 포함하는 스토리지 계정에 대한 SAS 토큰"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "databricks-ls-poc-datafactory_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"syndpdatawarehouse_password": {
+						"value": "[parameters('syndpdatawarehouse_password')]"
+					},
+					"ERP_ERPPROD_password": {
+						"value": "[parameters('ERP_ERPPROD_password')]"
+					},
+					"LS_NAS_password": {
+						"value": "[parameters('LS_NAS_password')]"
+					},
+					"PMS_CPMS_password": {
+						"value": "[parameters('PMS_CPMS_password')]"
+					},
+					"RMS_wcadmin_password": {
+						"value": "[parameters('RMS_wcadmin_password')]"
+					},
+					"databrickslspocsa_accountKey": {
+						"value": "[parameters('databrickslspocsa_accountKey')]"
+					},
+					"syndpdatawarehouse_properties_typeProperties_server": {
+						"value": "[parameters('syndpdatawarehouse_properties_typeProperties_server')]"
+					},
+					"syndpdatawarehouse_properties_typeProperties_database": {
+						"value": "[parameters('syndpdatawarehouse_properties_typeProperties_database')]"
+					},
+					"syndpdatawarehouse_properties_typeProperties_userName": {
+						"value": "[parameters('syndpdatawarehouse_properties_typeProperties_userName')]"
+					},
+					"ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"ERP_ERPPROD_properties_typeProperties_server": {
+						"value": "[parameters('ERP_ERPPROD_properties_typeProperties_server')]"
+					},
+					"ERP_ERPPROD_properties_typeProperties_username": {
+						"value": "[parameters('ERP_ERPPROD_properties_typeProperties_username')]"
+					},
+					"LS_NAS_properties_typeProperties_host": {
+						"value": "[parameters('LS_NAS_properties_typeProperties_host')]"
+					},
+					"LS_NAS_properties_typeProperties_userId": {
+						"value": "[parameters('LS_NAS_properties_typeProperties_userId')]"
+					},
+					"PMS_CPMS_properties_typeProperties_server": {
+						"value": "[parameters('PMS_CPMS_properties_typeProperties_server')]"
+					},
+					"PMS_CPMS_properties_typeProperties_database": {
+						"value": "[parameters('PMS_CPMS_properties_typeProperties_database')]"
+					},
+					"PMS_CPMS_properties_typeProperties_userName": {
+						"value": "[parameters('PMS_CPMS_properties_typeProperties_userName')]"
+					},
+					"RMS_wcadmin_properties_typeProperties_server": {
+						"value": "[parameters('RMS_wcadmin_properties_typeProperties_server')]"
+					},
+					"RMS_wcadmin_properties_typeProperties_database": {
+						"value": "[parameters('RMS_wcadmin_properties_typeProperties_database')]"
+					},
+					"RMS_wcadmin_properties_typeProperties_userName": {
+						"value": "[parameters('RMS_wcadmin_properties_typeProperties_userName')]"
+					},
+					"databrickslspocsa_properties_typeProperties_url": {
+						"value": "[parameters('databrickslspocsa_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

@@ -1,0 +1,72 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "databricks-ls-poc-datafactory"
+		},
+		"ERP_ERPPROD_password": {
+			"value": ""
+		},
+		"LS_NAS_password": {
+			"value": ""
+		},
+		"PMS_CPMS_password": {
+			"value": ""
+		},
+		"RMS_wcadmin_password": {
+			"value": ""
+		},
+		"databrickslspocsa_accountKey": {
+			"value": ""
+		},
+		"syndpdatawarehouse_password": {
+			"value": ""
+		},
+		"ERP_ERPPROD_properties_typeProperties_server": {
+			"value": "165.244.241.132:1601/ERPPROD"
+		},
+		"ERP_ERPPROD_properties_typeProperties_username": {
+			"value": "LSISDATALAKE"
+		},
+		"LS_NAS_properties_typeProperties_host": {
+			"value": "\\\\165.243.101.217\\data"
+		},
+		"LS_NAS_properties_typeProperties_userId": {
+			"value": "busan_fat"
+		},
+		"PMS_CPMS_properties_typeProperties_server": {
+			"value": "10.153.3.90"
+		},
+		"PMS_CPMS_properties_typeProperties_database": {
+			"value": "CPMS"
+		},
+		"PMS_CPMS_properties_typeProperties_userName": {
+			"value": "LSDPS"
+		},
+		"RMS_wcadmin_properties_typeProperties_server": {
+			"value": "165.243.100.125"
+		},
+		"RMS_wcadmin_properties_typeProperties_database": {
+			"value": "wcadmin"
+		},
+		"RMS_wcadmin_properties_typeProperties_userName": {
+			"value": "LSDPS"
+		},
+		"databrickslspocsa_properties_typeProperties_url": {
+			"value": "https://databrickslspocsa.dfs.core.windows.net/"
+		},
+		"syndpdatawarehouse_properties_typeProperties_server": {
+			"value": "synw-datawarehouse-prod-001.sql.azuresynapse.net"
+		},
+		"syndpdatawarehouse_properties_typeProperties_database": {
+			"value": "syndpdatawarehouse"
+		},
+		"syndpdatawarehouse_properties_typeProperties_userName": {
+			"value": "LSESNOWFLAKE"
+		},
+		"ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/6964c315-93f4-43ed-9c55-ab9ff3d37dc3/resourcegroups/DataPlatform/providers/Microsoft.DataFactory/factories/ls-dp-adf/integrationruntimes/ls-dp-adf-ir-new"
+		}
+	}
+}
