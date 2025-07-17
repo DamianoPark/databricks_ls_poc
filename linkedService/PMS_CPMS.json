@@ -1,0 +1,21 @@
+{
+	"name": "PMS_CPMS",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "10.153.3.90",
+			"database": "CPMS",
+			"encrypt": "optional",
+			"trustServerCertificate": false,
+			"authenticationType": "SQL",
+			"userName": "LSDPS",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzMTQxMDEyZS00NzVhLTQ3NDItYjUxZC0wZWRjNGYwYzI4YWIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ls-dp-adf-ir-new",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

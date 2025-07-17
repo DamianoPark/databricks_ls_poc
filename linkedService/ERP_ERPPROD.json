@@ -1,0 +1,19 @@
+{
+	"name": "ERP_ERPPROD",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "Oracle",
+		"version": "2.0",
+		"typeProperties": {
+			"server": "165.244.241.132:1601/ERPPROD",
+			"authenticationType": "Basic",
+			"username": "LSISDATALAKE",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiNzQxMDk0Yy1lNmY5LTRjYmQtYThjOS0yODk4YWU5YzRjMjIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ls-dp-adf-ir-new",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

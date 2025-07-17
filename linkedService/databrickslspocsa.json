@@ -1,0 +1,16 @@
+{
+	"name": "databrickslspocsa",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://databrickslspocsa.dfs.core.windows.net/",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJlODFhYjg1ZC04NjFjLTQ5ZTAtYmI0Yy00ZDk2ODRkZjI0NjciLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ls-dp-adf-ir-new",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

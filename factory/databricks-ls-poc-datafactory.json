@@ -1,0 +1,9 @@
+{
+	"name": "databricks-ls-poc-datafactory",
+	"location": "koreacentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d196c5d1-b32f-41e3-b6c0-1aef1e0de9c2",
+		"tenantId": "247258cc-5eb2-4fd4-9bb2-f272103f0c34"
+	}
+}

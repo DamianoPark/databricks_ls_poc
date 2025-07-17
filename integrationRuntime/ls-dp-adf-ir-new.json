@@ -1,0 +1,12 @@
+{
+	"name": "ls-dp-adf-ir-new",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/6964c315-93f4-43ed-9c55-ab9ff3d37dc3/resourcegroups/DataPlatform/providers/Microsoft.DataFactory/factories/ls-dp-adf/integrationruntimes/ls-dp-adf-ir-new",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

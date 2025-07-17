@@ -1,0 +1,21 @@
+{
+	"name": "RMS_wcadmin",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "165.243.100.125",
+			"database": "wcadmin",
+			"encrypt": "optional",
+			"trustServerCertificate": false,
+			"authenticationType": "SQL",
+			"userName": "LSDPS",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwZjNiMzQ4Mi0yMTU5LTQwZTktOTk5NC03M2MxNDBhNWYyZDkiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ls-dp-adf-ir-new",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
