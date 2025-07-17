@@ -1,0 +1,90 @@
+{
+	"name": "DS_SRC_NAS_FS2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_NAS",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "DS_TEMP_MONITORING/File System"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation",
+				"folderPath": "테스트 2시험실"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "No.",
+				"type": "String"
+			},
+			{
+				"name": " Date&Time",
+				"type": "String"
+			},
+			{
+				"name": " ms",
+				"type": "String"
+			},
+			{
+				"name": "CH1",
+				"type": "String"
+			},
+			{
+				"name": "CH2",
+				"type": "String"
+			},
+			{
+				"name": "CH3",
+				"type": "String"
+			},
+			{
+				"name": "CH4",
+				"type": "String"
+			},
+			{
+				"name": "CH5",
+				"type": "String"
+			},
+			{
+				"name": "CH6",
+				"type": "String"
+			},
+			{
+				"name": "CH7",
+				"type": "String"
+			},
+			{
+				"name": "CH8",
+				"type": "String"
+			},
+			{
+				"name": "CH9",
+				"type": "String"
+			},
+			{
+				"name": "CH10",
+				"type": "String"
+			},
+			{
+				"name": "Alarm1",
+				"type": "String"
+			},
+			{
+				"name": "Alarm2",
+				"type": "String"
+			},
+			{
+				"name": "AlarmOut",
+				"type": "String"
+			}
+		]
+	}
+}
