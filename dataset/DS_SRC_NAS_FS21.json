@@ -1,6 +1,10 @@
 {
 	"name": "DS_SRC_NAS_FS21",
 	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_NAS",
+			"type": "LinkedServiceReference"
+		},
 		"folder": {
 			"name": "DS_TEMP_MONITORING/File System"
 		},

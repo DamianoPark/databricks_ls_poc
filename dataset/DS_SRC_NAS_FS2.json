@@ -1,6 +1,10 @@
 {
 	"name": "DS_SRC_NAS_FS2",
 	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_NAS",
+			"type": "LinkedServiceReference"
+		},
 		"folder": {
 			"name": "DS_TEMP_MONITORING/File System"
 		},
@@ -8,7 +12,8 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "FileServerLocation"
+				"type": "FileServerLocation",
+				"folderPath": "테스트 2시험실"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
