@@ -1,0 +1,498 @@
+{
+	"name": "COPY_TO_SYNAPSE",
+	"properties": {
+		"activities": [
+			{
+				"name": "GET_CFG",
+				"description": "Get migration table information from configuration table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT [load_id]\n      ,[source_name]\n      ,[source]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [r_mig_flg] = 1\n  AND [interface_id] = '@{pipeline().parameters.IF_ID}'\n",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_FRW_ASQL_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().parameters.META_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().parameters.META_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().parameters.META_DB_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().parameters.META_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "GET_DATE_RANGE",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GET_CFG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT \nMIN(@{split(activity('GET_CFG').output.value[0].target_field,',')[0]}) AS MIN_DT ,\nMAX(@{split(activity('GET_CFG').output.value[0].target_field,',')[1]}) AS MAX_DT\nFROM [@{activity('GET_CFG').output.value[0].source_object_schema}].[@{activity('GET_CFG').output.value[0].source_object}]",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_FRW_ASQL_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().parameters.META_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().parameters.META_DB_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "GET_SRC_REC_CNT",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GET_DATE_RANGE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select COUNT(*) AS src_rec_cnt \nfrom @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object} ",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_FRW_ASQL_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().parameters.SRC_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().parameters.SRC_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().parameters.SRC_DB_USR_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().parameters.SRC_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "COPY_TO_SYNAPSE",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "GET_SRC_REC_CNT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select * from @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": {
+							"value": "IF OBJECT_ID('@{activity('GET_CFG').output.value[0].synapse_object_schema}.@{activity('GET_CFG').output.value[0].synapse_object}', 'U') IS NOT NULL\nDELETE FROM @{activity('GET_CFG').output.value[0].synapse_object_schema}.@{activity('GET_CFG').output.value[0].synapse_object} \nWHERE 1=1\nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= '@{activity('GET_DATE_RANGE').output.value[0].MIN_DT}'\nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} <= '@{activity('GET_DATE_RANGE').output.value[0].MAX_DT}'",
+							"type": "Expression"
+						},
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_FRW_ASQL_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().parameters.SRC_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().parameters.SRC_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().parameters.SRC_DB_USR_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().parameters.SRC_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_FRW_ADW_TBL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().parameters.LK_SRC_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().parameters.LK_SRC_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().parameters.LK_SRC_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().parameters.LK_SRC_DB_KVS_NM",
+								"type": "Expression"
+							},
+							"SCHEMA_NM": {
+								"value": "@{activity('GET_CFG').output.value[0].synapse_object_schema}",
+								"type": "Expression"
+							},
+							"TABLE_NM": {
+								"value": "@{activity('GET_CFG').output.value[0].synapse_object}",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "LOG",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "COPY_TO_SYNAPSE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('COPY_TO_SYNAPSE').output.executionDetails[0].status,'Succeeded')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "FAIL",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[SP_ETL_DATA_INSERT_LOG]",
+								"storedProcedureParameters": {
+									"err_mesg": {
+										"value": {
+											"value": "@activity('COPY_TO_SYNAPSE').output.errors[0].Message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"load_cnt": {
+										"value": {
+											"value": "@activity('COPY_TO_SYNAPSE').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Decimal"
+									},
+									"parm_from": {
+										"value": null,
+										"type": "String"
+									},
+									"parm_to": {
+										"value": null,
+										"type": "String"
+									},
+									"pgm_status": {
+										"value": "E",
+										"type": "String"
+									},
+									"run_pgm": {
+										"value": {
+											"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.value[0].synapse_object_schema,'.',activity('GET_CFG').output.value[0].synapse_object)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"st_date": {
+										"value": {
+											"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"tgt_job_area": {
+										"value": "ODS",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "syndpdatawarehouse",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "SUCCESS",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[SP_ETL_DATA_INSERT_LOG]",
+								"storedProcedureParameters": {
+									"err_mesg": {
+										"value": null,
+										"type": "String"
+									},
+									"load_cnt": {
+										"value": {
+											"value": "@activity('COPY_TO_SYNAPSE').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Decimal"
+									},
+									"parm_from": {
+										"value": null,
+										"type": "String"
+									},
+									"parm_to": {
+										"value": null,
+										"type": "String"
+									},
+									"pgm_status": {
+										"value": "S",
+										"type": "String"
+									},
+									"run_pgm": {
+										"value": {
+											"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.value[0].synapse_object_schema,'.',activity('GET_CFG').output.value[0].synapse_object)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"st_date": {
+										"value": {
+											"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"tgt_job_area": {
+										"value": "ODS",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "syndpdatawarehouse",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"IF_ID": {
+				"type": "string"
+			},
+			"META_DB_SRV_NM": {
+				"type": "string",
+				"defaultValue": "ls-dp-sql.database.windows.net"
+			},
+			"META_DB_NM": {
+				"type": "string",
+				"defaultValue": "sqldb-dataportal"
+			},
+			"META_DB_USER_NM": {
+				"type": "string",
+				"defaultValue": "lseadmin"
+			},
+			"META_DB_KVS_NM": {
+				"type": "string",
+				"defaultValue": "KVS-FRW-META-ASQL"
+			},
+			"DLS_URL": {
+				"type": "string",
+				"defaultValue": "https://lsdpadls.dfs.core.windows.net/"
+			},
+			"DL_FS_NM": {
+				"type": "string",
+				"defaultValue": "lsdpadls"
+			},
+			"DL_DR_NM": {
+				"type": "string",
+				"defaultValue": "bronze"
+			},
+			"DL_FS_KVS_NM": {
+				"type": "string",
+				"defaultValue": "KVS-FRW-FS-ADLS"
+			},
+			"SRC_DB_SRV_NM": {
+				"type": "string",
+				"defaultValue": "ls-dp-sql.database.windows.net"
+			},
+			"SRC_DB_NM": {
+				"type": "string",
+				"defaultValue": "sqldb-bridge"
+			},
+			"SRC_NM": {
+				"type": "string",
+				"defaultValue": "ERP-BRIDGE"
+			},
+			"SRC_DB_USR_NM": {
+				"type": "string",
+				"defaultValue": "lseadmin"
+			},
+			"SRC_DB_KVS_NM": {
+				"type": "string",
+				"defaultValue": "KVS-FRW-BRIDGE-ASQL"
+			},
+			"SP_INS_PIP_INFO": {
+				"type": "string",
+				"defaultValue": "Meta.SP_INS_RAW_PIP_INFO"
+			},
+			"SP_FAIL_ACT": {
+				"type": "string",
+				"defaultValue": "Meta.SP_FAIL_ACT"
+			},
+			"LK_SRC_SRV_NM": {
+				"type": "string",
+				"defaultValue": "synw-datawarehouse-prod-001.sql.azuresynapse.net"
+			},
+			"LK_SRC_DB_NM": {
+				"type": "string",
+				"defaultValue": "syndpdatawarehouse"
+			},
+			"LK_SRC_USER_NM": {
+				"type": "string",
+				"defaultValue": "sqladminuser"
+			},
+			"LK_SRC_DB_KVS_NM": {
+				"type": "string",
+				"defaultValue": "PROD-KVS-FRW-ADW-SYN"
+			}
+		},
+		"folder": {
+			"name": "2ND PROJECT/3. FRAMEWORK/BRIDGE TO SYNAPSE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-12-20T01:08:34Z"
+	}
+}

@@ -1,0 +1,109 @@
+{
+	"name": "CBATCH_SEQ_D_ODS_06",
+	"properties": {
+		"activities": [
+			{
+				"name": "SEQ_C_D_OD_ERP_601002",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEQ_C_D_OD_ERP_601002",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DW_IPD_MP_PROD_AMOUNT_C",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SEQ_C_D_OD_ERP_601002",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "DW_IPD_MP_PROD_AMOUNT_C",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SEQ_C_D_OD_ERP_601001",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEQ_C_D_OD_ERP_601001",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SEQ_C_D_OD_GHR_610000",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEQ_C_D_OD_GHR_610000",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "EIS_DYNA_DASH_DAILY_REPORT_C",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SEQ_C_D_OD_ERP_601002",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SP_RUN_FULL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"RUN_PGM": "SP_T_EIS_DYNA_DASH_DAILY_REPORT_N_C"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_ODS_06"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-01-11T05:07:27Z"
+	}
+}

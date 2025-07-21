@@ -1,0 +1,67 @@
+{
+	"name": "CBATCH_SEQ_D_DW_06",
+	"properties": {
+		"activities": [
+			{
+				"name": "SEQ_C_D_DW_ACT_610000",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEQ_C_D_DW_ACT_610000",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SEQ_C_D_DW_MKT_610000",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SEQ_C_D_DW_ACT_610000",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEQ_C_D_DW_MKT_610000",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SEQ_C_D_DW_PRD_610000",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEQ_C_D_DW_PRD_610000",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_DW_06"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-02-18T04:57:23Z"
+	}
+}

@@ -1,0 +1,51 @@
+{
+	"name": "SEQ_C_D_OD_GHR_610000",
+	"properties": {
+		"activities": [
+			{
+				"name": "EHR_EMPLOYEES",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "EHR_EMPLOYEES",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "GHR_EHR_DP_EMPLOYEE_V",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "EHR_EMPLOYEES",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "GHR_EHR_DP_EMPLOYEE_V",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_ODS_06"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-01-06T11:00:19Z"
+	}
+}

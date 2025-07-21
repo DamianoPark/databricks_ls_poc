@@ -1,0 +1,107 @@
+{
+	"name": "EAI_COMPLETED",
+	"properties": {
+		"activities": [
+			{
+				"name": "UNTIL",
+				"type": "Until",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(activity('GET_EAI_REST_LOG').output.count,1)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GET_EAI_REST_LOG",
+							"description": "Get migration table information from configuration table",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT *\n  FROM [META].[EAI_REST_LOG]\n  WHERE 1=1\n  AND [IF_DATETIME] = '@{pipeline().parameters.IF_DATETIME}'\n  AND [IF_ID] = '@{pipeline().parameters.IF_ID}'",
+										"type": "Expression"
+									},
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_FRW_ASQL_ALL",
+									"type": "DatasetReference",
+									"parameters": {
+										"SRC_SRV_NM": {
+											"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+											"type": "Expression"
+										},
+										"SRC_DB_NM": {
+											"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+											"type": "Expression"
+										},
+										"SRC_USER_NM": {
+											"value": "@pipeline().globalParameters.GP_META_USER_NM",
+											"type": "Expression"
+										},
+										"SRC_DB_KVS_NM": {
+											"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "WAIT",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "GET_EAI_REST_LOG",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 3
+							}
+						}
+					],
+					"timeout": "2:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"IF_ID": {
+				"type": "string"
+			},
+			"IF_DATETIME": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"X": {
+				"type": "String"
+			},
+			"TMP_X": {
+				"type": "String",
+				"defaultValue": "0"
+			}
+		},
+		"folder": {
+			"name": "2ND PROJECT/3. FRAMEWORK/RESTCALL"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-01-31T09:13:00Z"
+	}
+}

@@ -1,0 +1,143 @@
+{
+	"name": "CBATCH_SEQ_D_06",
+	"properties": {
+		"activities": [
+			{
+				"name": "CBATCH_SEQ_D_DW_06",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CBATCH_SEQ_D_ODS_06",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CBATCH_SEQ_D_DW_06",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "CBATCH_SEQ_D_DM_06",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CBATCH_SEQ_D_DW_06",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CBATCH_SEQ_D_DM_06",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "CBATCH_SEQ_D_ODS_06",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "XXSM_SYSTEM_USER_EXPIRE_MAIL_T_C",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CBATCH_SEQ_D_ODS_06",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "XXSM_SYSTEM_USER_EXPIRE_MAIL_T_C",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "XXSM_SYSTEM_USER_EXPIRE_MAIL_T_C",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "BI_DASH_SP",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "BI_DASH",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "BI_DASH_SP",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "BI_DASH",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CBATCH_SEQ_D_DM_06",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "BI_DASH",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-06-01T07:21:06Z"
+	}
+}

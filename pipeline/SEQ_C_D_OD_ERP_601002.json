@@ -1,0 +1,92 @@
+{
+	"name": "SEQ_C_D_OD_ERP_601002",
+	"properties": {
+		"activities": [
+			{
+				"name": "ERP_ECST_SALES_DETAILS",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ERP_ECST_SALES_DETAILS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ECST_COST_RESULT",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ECST_COST_RESULT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "EPO_TCOPQ_DATE_LOSS",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "EPO_TCOPQ_DATE_LOSS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "EOE_SALES_BATCH",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "EOE_SALES_BATCH",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ECST_WIP_VALUE_HISTORIES",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ECST_WIP_VALUE_HISTORIES",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_ODS_06"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-01-11T05:07:25Z"
+	}
+}
