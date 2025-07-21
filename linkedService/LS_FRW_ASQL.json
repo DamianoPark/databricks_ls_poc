@@ -1,0 +1,35 @@
+{
+	"name": "LS_FRW_ASQL",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"SRC_SRV_NM": {
+				"type": "string"
+			},
+			"SRC_DB_NM": {
+				"type": "string"
+			},
+			"SRC_USER_NM": {
+				"type": "string"
+			},
+			"SRC_DB_KVS_NM": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "@{linkedService().SRC_SRV_NM}",
+			"database": "@{linkedService().SRC_DB_NM}",
+			"encrypt": "mandatory",
+			"trustServerCertificate": false,
+			"authenticationType": "SQL",
+			"userName": "sqladmin",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwMzk3NWI0ZS0zYTZhLTQ2NGMtYTVkOC1kZTIyODA1YjZkOTYiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ls-dp-adf-ir-new",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
