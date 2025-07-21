@@ -1,0 +1,26 @@
+{
+	"name": "Trigger_1min_Origin_PL_COPY_FS_to_BLOB_v4_PC2",
+	"properties": {
+		"description": "분마다 Origin_PL_COPY_FS_to_BLOB_v4_PC2 트리",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Origin_PL_COPY_FS_to_BLOB_v4_PC2",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 1,
+				"startTime": "2025-07-21T01:07:00",
+				"endTime": "2025-08-31T01:07:00",
+				"timeZone": "Korea Standard Time"
+			}
+		}
+	}
+}
