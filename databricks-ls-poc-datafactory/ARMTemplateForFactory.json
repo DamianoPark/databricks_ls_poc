@@ -97,429 +97,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/ERP_ERPPROD')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "Oracle",
-				"version": "2.0",
-				"typeProperties": {
-					"server": "[parameters('ERP_ERPPROD_properties_typeProperties_server')]",
-					"authenticationType": "Basic",
-					"username": "[parameters('ERP_ERPPROD_properties_typeProperties_username')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('ERP_ERPPROD_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "ls-dp-adf-ir-new",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_NAS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "FileServer",
-				"typeProperties": {
-					"host": "[parameters('LS_NAS_properties_typeProperties_host')]",
-					"userId": "[parameters('LS_NAS_properties_typeProperties_userId')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_NAS_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "ls-dp-adf-ir-new",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PMS_CPMS')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('PMS_CPMS_properties_typeProperties_server')]",
-					"database": "[parameters('PMS_CPMS_properties_typeProperties_database')]",
-					"encrypt": "optional",
-					"trustServerCertificate": false,
-					"authenticationType": "SQL",
-					"userName": "[parameters('PMS_CPMS_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('PMS_CPMS_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "ls-dp-adf-ir-new",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/RMS_wcadmin')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('RMS_wcadmin_properties_typeProperties_server')]",
-					"database": "[parameters('RMS_wcadmin_properties_typeProperties_database')]",
-					"encrypt": "optional",
-					"trustServerCertificate": false,
-					"authenticationType": "SQL",
-					"userName": "[parameters('RMS_wcadmin_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('RMS_wcadmin_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "ls-dp-adf-ir-new",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/databrickslspocsa')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('databrickslspocsa_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('databrickslspocsa_accountKey')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "ls-dp-adf-ir-new",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/syndpdatawarehouse')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDW",
-				"typeProperties": {
-					"server": "[parameters('syndpdatawarehouse_properties_typeProperties_server')]",
-					"database": "[parameters('syndpdatawarehouse_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": false,
-					"authenticationType": "SQL",
-					"userName": "[parameters('syndpdatawarehouse_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('syndpdatawarehouse_password')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ls-dp-adf-ir-new')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"typeProperties": {
-					"linkedInfo": {
-						"resourceId": "[parameters('ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId')]",
-						"authorizationType": "Rbac"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SRC_NAS_FS2')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_NAS",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "DS_TEMP_MONITORING/File System"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"folderPath": "테스트 2시험실"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "No.",
-						"type": "String"
-					},
-					{
-						"name": " Date&Time",
-						"type": "String"
-					},
-					{
-						"name": " ms",
-						"type": "String"
-					},
-					{
-						"name": "CH1",
-						"type": "String"
-					},
-					{
-						"name": "CH2",
-						"type": "String"
-					},
-					{
-						"name": "CH3",
-						"type": "String"
-					},
-					{
-						"name": "CH4",
-						"type": "String"
-					},
-					{
-						"name": "CH5",
-						"type": "String"
-					},
-					{
-						"name": "CH6",
-						"type": "String"
-					},
-					{
-						"name": "CH7",
-						"type": "String"
-					},
-					{
-						"name": "CH8",
-						"type": "String"
-					},
-					{
-						"name": "CH9",
-						"type": "String"
-					},
-					{
-						"name": "CH10",
-						"type": "String"
-					},
-					{
-						"name": "Alarm1",
-						"type": "String"
-					},
-					{
-						"name": "Alarm2",
-						"type": "String"
-					},
-					{
-						"name": "AlarmOut",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_NAS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_BLOB_source_PC2')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "databrickslspocsa",
-					"type": "LinkedServiceReference",
-					"parameters": {}
-				},
-				"folder": {
-					"name": "DS_TEMP_MONITORING/Blob Storage"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": "source.csv",
-						"folderPath": "source2",
-						"fileSystem": "temp-monitoring"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "No.",
-						"type": "String"
-					},
-					{
-						"name": " Date&Time",
-						"type": "String"
-					},
-					{
-						"name": " ms",
-						"type": "String"
-					},
-					{
-						"name": "CH1",
-						"type": "String"
-					},
-					{
-						"name": "CH2",
-						"type": "String"
-					},
-					{
-						"name": "CH3",
-						"type": "String"
-					},
-					{
-						"name": "CH4",
-						"type": "String"
-					},
-					{
-						"name": "CH5",
-						"type": "String"
-					},
-					{
-						"name": "CH6",
-						"type": "String"
-					},
-					{
-						"name": "CH7",
-						"type": "String"
-					},
-					{
-						"name": "CH8",
-						"type": "String"
-					},
-					{
-						"name": "CH9",
-						"type": "String"
-					},
-					{
-						"name": "CH10",
-						"type": "String"
-					},
-					{
-						"name": "Alarm1",
-						"type": "String"
-					},
-					{
-						"name": "Alarm2",
-						"type": "String"
-					},
-					{
-						"name": "AlarmOut",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_BLOB_input_PC2')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "databrickslspocsa",
-					"type": "LinkedServiceReference",
-					"parameters": {}
-				},
-				"folder": {
-					"name": "DS_TEMP_MONITORING/Blob Storage"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "input2",
-						"fileSystem": "temp-monitoring"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_BLOB_ouput_PC2')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "databrickslspocsa",
-					"type": "LinkedServiceReference",
-					"parameters": {}
-				},
-				"folder": {
-					"name": "DS_TEMP_MONITORING/Blob Storage"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "output2",
-						"fileSystem": "temp-monitoring"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/Origin_PL_COPY_FS_to_BLOB_v4_PC2')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1309,6 +886,458 @@
 				"[concat(variables('factoryId'), '/datasets/DS_BLOB_input_PC2')]",
 				"[concat(variables('factoryId'), '/datasets/DS_BLOB_ouput_PC2')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_BLOB_input_PC2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "databrickslspocsa",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_TEMP_MONITORING/Blob Storage"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "input2",
+						"fileSystem": "temp-monitoring"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_BLOB_ouput_PC2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "databrickslspocsa",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_TEMP_MONITORING/Blob Storage"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "output2",
+						"fileSystem": "temp-monitoring"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_BLOB_source_PC2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "databrickslspocsa",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_TEMP_MONITORING/Blob Storage"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "source.csv",
+						"folderPath": "source2",
+						"fileSystem": "temp-monitoring"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "No.",
+						"type": "String"
+					},
+					{
+						"name": " Date&Time",
+						"type": "String"
+					},
+					{
+						"name": " ms",
+						"type": "String"
+					},
+					{
+						"name": "CH1",
+						"type": "String"
+					},
+					{
+						"name": "CH2",
+						"type": "String"
+					},
+					{
+						"name": "CH3",
+						"type": "String"
+					},
+					{
+						"name": "CH4",
+						"type": "String"
+					},
+					{
+						"name": "CH5",
+						"type": "String"
+					},
+					{
+						"name": "CH6",
+						"type": "String"
+					},
+					{
+						"name": "CH7",
+						"type": "String"
+					},
+					{
+						"name": "CH8",
+						"type": "String"
+					},
+					{
+						"name": "CH9",
+						"type": "String"
+					},
+					{
+						"name": "CH10",
+						"type": "String"
+					},
+					{
+						"name": "Alarm1",
+						"type": "String"
+					},
+					{
+						"name": "Alarm2",
+						"type": "String"
+					},
+					{
+						"name": "AlarmOut",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SRC_NAS_FS2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_NAS",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "DS_TEMP_MONITORING/File System"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation",
+						"folderPath": "테스트 2시험실"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "No.",
+						"type": "String"
+					},
+					{
+						"name": " Date&Time",
+						"type": "String"
+					},
+					{
+						"name": " ms",
+						"type": "String"
+					},
+					{
+						"name": "CH1",
+						"type": "String"
+					},
+					{
+						"name": "CH2",
+						"type": "String"
+					},
+					{
+						"name": "CH3",
+						"type": "String"
+					},
+					{
+						"name": "CH4",
+						"type": "String"
+					},
+					{
+						"name": "CH5",
+						"type": "String"
+					},
+					{
+						"name": "CH6",
+						"type": "String"
+					},
+					{
+						"name": "CH7",
+						"type": "String"
+					},
+					{
+						"name": "CH8",
+						"type": "String"
+					},
+					{
+						"name": "CH9",
+						"type": "String"
+					},
+					{
+						"name": "CH10",
+						"type": "String"
+					},
+					{
+						"name": "Alarm1",
+						"type": "String"
+					},
+					{
+						"name": "Alarm2",
+						"type": "String"
+					},
+					{
+						"name": "AlarmOut",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_NAS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ERP_ERPPROD')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Oracle",
+				"version": "2.0",
+				"typeProperties": {
+					"server": "[parameters('ERP_ERPPROD_properties_typeProperties_server')]",
+					"authenticationType": "Basic",
+					"username": "[parameters('ERP_ERPPROD_properties_typeProperties_username')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('ERP_ERPPROD_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "ls-dp-adf-ir-new",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_NAS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('LS_NAS_properties_typeProperties_host')]",
+					"userId": "[parameters('LS_NAS_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_NAS_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "ls-dp-adf-ir-new",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PMS_CPMS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('PMS_CPMS_properties_typeProperties_server')]",
+					"database": "[parameters('PMS_CPMS_properties_typeProperties_database')]",
+					"encrypt": "optional",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('PMS_CPMS_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('PMS_CPMS_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "ls-dp-adf-ir-new",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RMS_wcadmin')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('RMS_wcadmin_properties_typeProperties_server')]",
+					"database": "[parameters('RMS_wcadmin_properties_typeProperties_database')]",
+					"encrypt": "optional",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('RMS_wcadmin_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('RMS_wcadmin_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "ls-dp-adf-ir-new",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/databrickslspocsa')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('databrickslspocsa_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('databrickslspocsa_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "ls-dp-adf-ir-new",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/syndpdatawarehouse')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"server": "[parameters('syndpdatawarehouse_properties_typeProperties_server')]",
+					"database": "[parameters('syndpdatawarehouse_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('syndpdatawarehouse_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('syndpdatawarehouse_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Trigger_1min_Origin_PL_COPY_FS_to_BLOB_v4_PC2')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "분마다 Origin_PL_COPY_FS_to_BLOB_v4_PC2 트리",
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "Origin_PL_COPY_FS_to_BLOB_v4_PC2",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2025-07-21T01:07:00",
+						"endTime": "2025-08-31T01:07:00",
+						"timeZone": "Korea Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Origin_PL_COPY_FS_to_BLOB_v4_PC2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls-dp-adf-ir-new')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {
+					"linkedInfo": {
+						"resourceId": "[parameters('ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId')]",
+						"authorizationType": "Rbac"
+					}
+				}
+			},
+			"dependsOn": []
 		}
 	]
 }
