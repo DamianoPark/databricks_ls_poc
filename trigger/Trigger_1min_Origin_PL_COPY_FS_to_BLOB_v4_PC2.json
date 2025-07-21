@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "분마다 Origin_PL_COPY_FS_to_BLOB_v4_PC2 트리",
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
