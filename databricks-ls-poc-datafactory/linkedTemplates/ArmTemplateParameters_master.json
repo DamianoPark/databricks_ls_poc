@@ -92,6 +92,9 @@
 		"DS_FRW_ADLS_ALL1_properties_typeProperties_folderPath": {
 			"value": "@dataset().DLS_DR"
 		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://kv-lse-datawarehouse.vault.azure.net/"
+		},
 		"containerUri": {
 			"value": ""
 		},

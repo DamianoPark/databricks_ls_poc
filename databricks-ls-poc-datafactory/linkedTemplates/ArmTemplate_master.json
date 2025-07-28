@@ -123,6 +123,10 @@
 			"type": "string",
 			"defaultValue": "@dataset().DLS_DR"
 		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-lse-datawarehouse.vault.azure.net/"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "스토리지 계정 연결 된 ARM 서식 파일을 포함 하는 URI입니다."
@@ -182,6 +186,9 @@
 					},
 					"ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId": {
 						"value": "[parameters('ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"AzureKeyVault1_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
 					},
 					"ERP_ERPPROD_properties_typeProperties_server": {
 						"value": "[parameters('ERP_ERPPROD_properties_typeProperties_server')]"
