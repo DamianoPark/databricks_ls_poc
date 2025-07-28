@@ -1,0 +1,77 @@
+{
+	"name": "SEQ_C_M_OD_RMS_010000",
+	"properties": {
+		"activities": [
+			{
+				"name": "PMS_RMS_PJT_MAP_TO_BI_V",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "BI_ORDER_ITEM_V",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PMS_RMS_PJT_MAP_TO_BI_V",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "BI_ORDER_ITEM_V",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "BI_ORDER_ITEM_V",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "OD_RMS_BI_ORDER_ITEM_SPL_V",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PMS_RMS_PJT_MAP_TO_BI_V",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SP_RUN_FULL2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"RUN_PGM": "SP_RMS_BI_ORDER_ITEM_SPL_V_N_C"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_M/CBATCH_SEQ_M_ODS"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-02-10T01:09:57Z"
+	}
+}

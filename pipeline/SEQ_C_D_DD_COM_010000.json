@@ -1,0 +1,121 @@
+{
+	"name": "SEQ_C_D_DD_COM_010000",
+	"properties": {
+		"activities": [
+			{
+				"name": "DD_COM_CUSTOMER_MASTER",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DD_COM_CUSTOMER",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SP_RUN_FULL1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"RUN_PGM": "SP_T_DIM_FND_COM_CUSTOMER_MASTER_N_C"
+					}
+				}
+			},
+			{
+				"name": "DD_COM_CUSTOMER",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SP_RUN_FULL1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"RUN_PGM": "SP_T_DIM_FND_COM_CUSTOMER_N_C"
+					}
+				}
+			},
+			{
+				"name": "DD_COM_COA",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SP_RUN_FULL1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"RUN_PGM": "SP_T_DIM_FND_COM_COA_N_C"
+					}
+				}
+			},
+			{
+				"name": "DD_COM_SLABOR_COST_CLASS",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SP_RUN_FULL1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"RUN_PGM": "SP_T_DIM_FND_COM_SLABOR_COST_CLASS_N_C"
+					}
+				}
+			},
+			{
+				"name": "DD_COM_SLBR_COST_CLSS_COA",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DD_COM_SLABOR_COST_CLASS",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SP_RUN_FULL1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"RUN_PGM": "SP_T_DIM_FND_COM_SLBR_COST_CLSS_COA_N_C"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_00/CBATCH_SEQ_D_DD/SEQ_C_D_DD_COM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-01-26T01:20:45Z"
+	}
+}

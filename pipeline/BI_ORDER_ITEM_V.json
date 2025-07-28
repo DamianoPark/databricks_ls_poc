@@ -1,0 +1,289 @@
+{
+	"name": "BI_ORDER_ITEM_V",
+	"properties": {
+		"activities": [
+			{
+				"name": "TRUNCATE_BRIDGE",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "GET_CFG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LS_FRW_ASQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SRC_SRV_NM": {
+							"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_NM": {
+							"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+							"type": "Expression"
+						},
+						"SRC_USER_NM": {
+							"value": "@pipeline().globalParameters.GP_META_USER_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_KVS_NM": {
+							"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+							"type": "Expression"
+						}
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "IF EXISTS (SELECT * FROM sys.objects WHERE 1=1 AND name = N'@{activity('GET_CFG').output.firstRow.source_object}' AND type = N'U')\nTRUNCATE TABLE [@{activity('GET_CFG').output.firstRow.source_object_schema}].[@{activity('GET_CFG').output.firstRow.source_object}]",
+								"type": "Expression"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "GET_CFG",
+				"description": "Get migration table information from configuration table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_FRW_ASQL_ALL3",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().globalParameters.GP_META_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "WORKFLOW",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "COMPLETED",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "1_WORKFLOW1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"interface_id": {
+							"value": "@variables('IF_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "SET_BODY",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "TRUNCATE_BRIDGE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "BODY",
+					"value": {
+						"value": "@concat('{\n    \"request\": {\n        \"header\": {\n            \"IF_ID\": \"',variables('IF_ID'),'\",\n            \"IF_GUUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_UUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_DATETIME\": \"',activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,'\"\n        },\n        \"body\": {\n            \"IF_TOTAL_CNT\": \"0\",\n            \"IF_SPLIT_CNT\": \"1\",\n            \"IF_SPLIT_SEQ\": \"1\",\n            \"IF_REQ_DATA\": [{}]\n        }\n    }\n}')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "REST_CALL",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "SET_BODY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('GET_CFG').output.firstRow.rest_call_url,'dev')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "WEB_PROD",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"httpRequestTimeout": "00:07:00",
+								"url": {
+									"value": "@pipeline().globalParameters.GP_EAI_URL_PROD",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "@{variables('BODY')}",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "WEB_DEV",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"httpRequestTimeout": "00:10:00",
+								"url": {
+									"value": "@pipeline().globalParameters.GP_EAI_URL_DEV",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "@{variables('BODY')}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "COMPLETED",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "REST_CALL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "EAI_COMPLETED1",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"IF_ID": {
+							"value": "@variables('IF_ID')",
+							"type": "Expression"
+						},
+						"IF_DATETIME": {
+							"value": "@activity('GET_CFG').output.firstRow.yyyyMMddHHmmss",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"DESCRIPTION": {
+				"type": "String",
+				"defaultValue": "RMS 연구소 프로젝트 품목 정보"
+			},
+			"BODY": {
+				"type": "String",
+				"defaultValue": "-------- BODY --------"
+			},
+			"IF_ID": {
+				"type": "String",
+				"defaultValue": "IF_SRD_DPS_RMS_0023"
+			},
+			"IF_REQ_DATA": {
+				"type": "String",
+				"defaultValue": "-------- PARAM --------"
+			}
+		},
+		"folder": {
+			"name": "2ND PROJECT/1. EAI/RMS/FULL"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-12-02T02:54:36Z"
+	}
+}

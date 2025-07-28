@@ -1,0 +1,113 @@
+{
+	"name": "SP_COMPLETED3",
+	"properties": {
+		"activities": [
+			{
+				"name": "UNTIL",
+				"type": "Until",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(activity('SP_COMPLETED').output.count,1)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "SP_COMPLETED",
+							"description": "Get migration table information from configuration table",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "IF ('@{pipeline().parameters.PARM_FROM}' <> 'NULL')\nBEGIN\n    SELECT *\n    FROM [dbo].[ETL_DATA_INSERT_LOG]\n    where 1=1\n    and FORMAT([START_DATE] , 'yyyyMMddHHmmss') >= '@{pipeline().parameters.START_DATE}'\n    and [RUN_PGM] = '@{pipeline().parameters.RUN_PGM}'\n    and [PARM_FROM] = '@{pipeline().parameters.PARM_FROM}'\n    and [PARM_TO] = '@{pipeline().parameters.PARM_TO}'\nEND\nIF ('@{pipeline().parameters.PARM_FROM}' = 'NULL')\nBEGIN\n    SELECT *\n    FROM [dbo].[ETL_DATA_INSERT_LOG]\n    where 1=1\n    and FORMAT([START_DATE] , 'yyyyMMddHHmmss') >= '@{pipeline().parameters.START_DATE}'\n    and [RUN_PGM] = '@{pipeline().parameters.RUN_PGM}'\nEND",
+										"type": "Expression"
+									},
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_FRW_ASQL_ALL3",
+									"type": "DatasetReference",
+									"parameters": {
+										"SRC_SRV_NM": {
+											"value": "@pipeline().globalParameters.GP_LK_SRC_SRV_NM",
+											"type": "Expression"
+										},
+										"SRC_DB_NM": {
+											"value": "@pipeline().globalParameters.GP_LK_SRC_DB_NM",
+											"type": "Expression"
+										},
+										"SRC_USER_NM": {
+											"value": "@pipeline().globalParameters.GP_LK_SRC_USER_NM",
+											"type": "Expression"
+										},
+										"SRC_DB_KVS_NM": {
+											"value": "@pipeline().globalParameters.GP_LK_SRC_DB_KVS_NM",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "WAIT",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "SP_COMPLETED",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 5
+							}
+						}
+					],
+					"timeout": "1:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"RUN_PGM": {
+				"type": "string"
+			},
+			"START_DATE": {
+				"type": "string"
+			},
+			"PARM_FROM": {
+				"type": "string"
+			},
+			"PARM_TO": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"X": {
+				"type": "String"
+			},
+			"TMP_X": {
+				"type": "String",
+				"defaultValue": "0"
+			}
+		},
+		"folder": {
+			"name": "2ND PROJECT/3. FRAMEWORK/STOREDPROCEDURE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-02-10T07:14:56Z"
+	}
+}
