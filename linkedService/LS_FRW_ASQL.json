@@ -1,5 +1,6 @@
 {
 	"name": "LS_FRW_ASQL",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"parameters": {
 			"SRC_SRV_NM": {
@@ -18,28 +19,8 @@
 		"annotations": [],
 		"type": "AzureSqlDatabase",
 		"typeProperties": {
-			"server": "@{linkedService().SRC_SRV_NM}",
-			"database": "@{linkedService().SRC_DB_NM}",
-			"encrypt": "optional",
-			"trustServerCertificate": false,
-			"authenticationType": "SQL",
-			"userName": "@{linkedService().SRC_USER_NM}",
-			"password": {
-				"type": "AzureKeyVaultSecret",
-				"store": {
-					"referenceName": "AzureKeyVault1",
-					"type": "LinkedServiceReference"
-				},
-				"secretName": {
-					"value": "@linkedService().SRC_DB_KVS_NM",
-					"type": "Expression"
-				}
-			}
-		},
-		"connectVia": {
-			"referenceName": "ls-dp-adf-ir-new",
-			"type": "IntegrationRuntimeReference"
+			"connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=@{linkedService().SRC_SRV_NM};initial catalog=@{linkedService().SRC_DB_NM};user id=LSESNOWFLAKE",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDhCMzMyRkRBLUEyNzQtNDVFQS1CQkVDLURGQjI3M0RFQTQxRl82NmFjY2YzZi00MjhlLTQ2MDAtODBlMy1kZDIwODZiNDE4NDMiDQp9"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/linkedservices"
+	}
 }
