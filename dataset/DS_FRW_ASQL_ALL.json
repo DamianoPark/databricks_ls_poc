@@ -5,22 +5,8 @@
 			"referenceName": "LS_FRW_ASQL",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"SRC_SRV_NM": {
-					"value": "@dataset().SRC_SRV_NM",
-					"type": "Expression"
-				},
-				"SRC_DB_NM": {
-					"value": "@dataset().SRC_DB_NM",
-					"type": "Expression"
-				},
-				"SRC_USER_NM": {
-					"value": "@dataset().SRC_USER_NM",
-					"type": "Expression"
-				},
-				"SRC_DB_KVS_NM": {
-					"value": "@dataset().SRC_DB_KVS_NM",
-					"type": "Expression"
-				}
+				"SRC_SRV_NM": "synw-datawarehouse-prod-001.sql.azuresynapse.net",
+				"SRC_DB_NM": "syndpdatawarehouse"
 			}
 		},
 		"parameters": {
@@ -42,6 +28,10 @@
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
-		"schema": []
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "V_DIM_FND_FINANCE_CODE_MST"
+		}
 	}
 }
