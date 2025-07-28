@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "'ERP_ERPPROD'의 'password'에 대한 보안 문자열"
 		},
+		"LS_FRW_ASQL_password": {
+			"type": "secureString",
+			"metadata": "'LS_FRW_ASQL'의 'password'에 대한 보안 문자열"
+		},
 		"LS_NAS_password": {
 			"type": "secureString",
 			"metadata": "'LS_NAS'의 'password'에 대한 보안 문자열"
@@ -55,6 +59,18 @@
 			"type": "string",
 			"defaultValue": "LSISDATALAKE"
 		},
+		"LS_FRW_ASQL_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "@{linkedService().SRC_SRV_NM}"
+		},
+		"LS_FRW_ASQL_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().SRC_DB_NM}"
+		},
+		"LS_FRW_ASQL_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sqladmin"
+		},
 		"LS_NAS_properties_typeProperties_host": {
 			"type": "string",
 			"defaultValue": "\\\\165.243.101.217\\data"
@@ -90,12 +106,47 @@
 		"databrickslspocsa_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
+		},
+		"DS_FRW_ADLS_ALL_properties_typeProperties_fileName": {
+			"type": "string",
+			"defaultValue": "@dataset().DLS_FN"
+		},
+		"DS_FRW_ADLS_ALL_properties_typeProperties_folderPath": {
+			"type": "string",
+			"defaultValue": "@dataset().DLS_DR"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/XXSM_SYSTEM_USER_EXPIRE_MAIL_T_C')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "XXSM_SYSTEM_USER_EXPIRE_MAIL_T_C",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/XXSM_SYSTEM_USER_EXPIRE_MAIL_T_C"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-11T05:07:25Z"
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/syndpdatawarehouse')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -134,6 +185,91 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ADW_ALL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "syndpdatawarehouse",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "FRW_SRC_DS"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/syndpdatawarehouse')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ADW_TBL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "syndpdatawarehouse",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					},
+					"SCHEMA_NM": {
+						"type": "string"
+					},
+					"TABLE_NM": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "FRW_SRC_DS"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SCHEMA_NM",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TABLE_NM",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/syndpdatawarehouse')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ERP_ERPPROD')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -148,6 +284,48 @@
 					"password": {
 						"type": "SecureString",
 						"value": "[parameters('ERP_ERPPROD_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "ls-dp-adf-ir-new",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_FRW_ASQL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('LS_FRW_ASQL_properties_typeProperties_server')]",
+					"database": "[parameters('LS_FRW_ASQL_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_FRW_ASQL_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_FRW_ASQL_password')]"
 					}
 				},
 				"connectVia": {
@@ -260,6 +438,42 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/ls-dp-adf-ir-new')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ADW_ALL1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "syndpdatawarehouse",
+					"type": "LinkedServiceReference",
+					"parameters": {}
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "FRW_SRC_DS"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/syndpdatawarehouse')]"
 			]
 		},
 		{
@@ -422,6 +636,211 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ADLS_ALL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "databrickslspocsa",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SRC_FS_KVS_NM": {
+						"type": "string"
+					},
+					"DLS_DR": {
+						"type": "string"
+					},
+					"DLS_FN": {
+						"type": "string"
+					},
+					"DLS_URL": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ADLS GEN2"
+				},
+				"annotations": [],
+				"type": "AzureBlobFSFile",
+				"typeProperties": {
+					"format": {
+						"type": "ParquetFormat"
+					},
+					"fileName": {
+						"value": "[parameters('DS_FRW_ADLS_ALL_properties_typeProperties_fileName')]",
+						"type": "Expression"
+					},
+					"folderPath": {
+						"value": "[parameters('DS_FRW_ADLS_ALL_properties_typeProperties_folderPath')]",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ASQL_ALL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FRW_ASQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SRC_SRV_NM": {
+							"value": "@dataset().SRC_SRV_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_NM": {
+							"value": "@dataset().SRC_DB_NM",
+							"type": "Expression"
+						},
+						"SRC_USER_NM": {
+							"value": "@dataset().SRC_USER_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_KVS_NM": {
+							"value": "@dataset().SRC_DB_KVS_NM",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "FRW_META_DS"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FRW_ASQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ASQL_TBL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FRW_ASQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SRC_SRV_NM": {
+							"value": "@dataset().SRC_SRV_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_NM": {
+							"value": "@dataset().SRC_DB_NM",
+							"type": "Expression"
+						},
+						"SRC_USER_NM": {
+							"value": "@dataset().SRC_USER_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_KVS_NM": {
+							"value": "@dataset().SRC_DB_KVS_NM",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					},
+					"SCHEMA_NM": {
+						"type": "string"
+					},
+					"TBL_NM": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "FRW_META_DS"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SCHEMA_NM",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TBL_NM",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FRW_ASQL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ORACLE_ALL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ERP_ERPPROD",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_PORT_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "FRW_SRC_DS"
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ERP_ERPPROD')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_SRC_NAS_FS2')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -514,829 +933,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_NAS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Origin_PL_COPY_FS_to_BLOB_v4_PC2')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy local to source",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [
-							{
-								"name": "Source",
-								"value": "테스트/"
-							},
-							{
-								"name": "Destination",
-								"value": "temp-monitoring/source/source.csv"
-							}
-						],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "FileServerReadSettings",
-									"recursive": true,
-									"modifiedDatetimeStart": {
-										"value": "@addminutes(utcnow(), -2)",
-										"type": "Expression"
-									},
-									"wildcardFileName": "*.csv",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings",
-									"skipLineCount": 28
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings",
-									"copyBehavior": "MergeFiles"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ""
-								}
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": true,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "No.",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 1
-										}
-									},
-									{
-										"source": {
-											"name": " Date&Time",
-											"type": "DateTime",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 2
-										}
-									},
-									{
-										"source": {
-											"name": " ms",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 3
-										}
-									},
-									{
-										"source": {
-											"name": "CH1",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 4
-										}
-									},
-									{
-										"source": {
-											"name": "CH2",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 5
-										}
-									},
-									{
-										"source": {
-											"name": "CH3",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 6
-										}
-									},
-									{
-										"source": {
-											"name": "CH4",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 7
-										}
-									},
-									{
-										"source": {
-											"name": "CH5",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 8
-										}
-									},
-									{
-										"source": {
-											"name": "CH6",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 9
-										}
-									},
-									{
-										"source": {
-											"name": "CH7",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 10
-										}
-									},
-									{
-										"source": {
-											"name": "CH8",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 11
-										}
-									},
-									{
-										"source": {
-											"name": "CH9",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 12
-										}
-									},
-									{
-										"source": {
-											"name": "CH10",
-											"type": "Decimal",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 13
-										}
-									},
-									{
-										"source": {
-											"name": "Alarm1",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 14
-										}
-									},
-									{
-										"source": {
-											"name": "Alarm2",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 15
-										}
-									},
-									{
-										"source": {
-											"name": "AlarmOut",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"type": "String",
-											"physicalType": "String",
-											"ordinal": 16
-										}
-									}
-								],
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false,
-									"dateTimeFormat": "yyyy-MM-dd HH:mm:ss"
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DS_SRC_NAS_FS2",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DS_BLOB_source_PC2",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					},
-					{
-						"name": "If rowsCopied is greater than 0",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Copy local to source",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(activity('Copy local to source').output.rowsCopied, 0)",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Copy local to input",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobFSReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings",
-												"skipLineCount": {
-													"value": "@add(int(activity('Copy local to source').output.rowsRead),-7)",
-													"type": "Expression"
-												}
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": {
-													"value": "@concat(convertTimeZone(utcnow(), 'Korea Standard Time', 'Korea Standard Time', '/yyyy-MM-dd/HH:mm:dd'),'.csv')",
-													"type": "Expression"
-												}
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 1
-													},
-													"sink": {
-														"name": "No.",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "DateTime",
-														"ordinal": 2
-													},
-													"sink": {
-														"name": "Date&Time",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 3
-													},
-													"sink": {
-														"name": "ms",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 4
-													},
-													"sink": {
-														"name": "CH1",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 5
-													},
-													"sink": {
-														"name": "CH2",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 6
-													},
-													"sink": {
-														"name": "CH3",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 7
-													},
-													"sink": {
-														"name": "CH4",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 8
-													},
-													"sink": {
-														"name": "CH5",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 9
-													},
-													"sink": {
-														"name": "CH6",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 10
-													},
-													"sink": {
-														"name": "CH7",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 11
-													},
-													"sink": {
-														"name": "CH8",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 12
-													},
-													"sink": {
-														"name": "CH9",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 13
-													},
-													"sink": {
-														"name": "CH10",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 14
-													},
-													"sink": {
-														"name": "Alarm1",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 15
-													},
-													"sink": {
-														"name": "Alarm2",
-														"physicalType": "String"
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 16
-													},
-													"sink": {
-														"name": "AlarmOut",
-														"physicalType": "String"
-													}
-												}
-											],
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_BLOB_source_PC2",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_BLOB_input_PC2",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									]
-								},
-								{
-									"name": "Copy local to output",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "Copy local to input",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "DelimitedTextSource",
-											"storeSettings": {
-												"type": "AzureBlobFSReadSettings",
-												"recursive": true,
-												"enablePartitionDiscovery": false
-											},
-											"formatSettings": {
-												"type": "DelimitedTextReadSettings",
-												"skipLineCount": 28
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobFSWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 1
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 1
-													}
-												},
-												{
-													"source": {
-														"type": "DateTime",
-														"ordinal": 2
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 2
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 3
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 3
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 4
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 4
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 5
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 5
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 6
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 6
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 7
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 7
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 8
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 8
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 9
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 9
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 10
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 10
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 11
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 11
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 12
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 12
-													}
-												},
-												{
-													"source": {
-														"type": "Decimal",
-														"ordinal": 13
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 13
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 14
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 14
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 15
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 15
-													}
-												},
-												{
-													"source": {
-														"type": "String",
-														"ordinal": 16
-													},
-													"sink": {
-														"type": "String",
-														"physicalType": "String",
-														"ordinal": 16
-													}
-												}
-											],
-											"typeConversion": true,
-											"typeConversionSettings": {
-												"allowDataTruncation": true,
-												"treatBooleanAsNumber": false
-											}
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "DS_BLOB_source_PC2",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "DS_BLOB_ouput_PC2",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									]
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "99. TEMP/TEMP_MONITORING"
-				},
-				"annotations": [],
-				"lastPublishTime": "2025-02-06T00:50:40Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_SRC_NAS_FS2')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_source_PC2')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_input_PC2')]",
-				"[concat(variables('factoryId'), '/datasets/DS_BLOB_ouput_PC2')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Trigger_1min_Origin_PL_COPY_FS_to_BLOB_v4_PC2')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"description": "분마다 Origin_PL_COPY_FS_to_BLOB_v4_PC2 트리",
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "Origin_PL_COPY_FS_to_BLOB_v4_PC2",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 1,
-						"startTime": "2025-07-21T01:07:00",
-						"endTime": "2025-08-31T01:07:00",
-						"timeZone": "Korea Standard Time"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Origin_PL_COPY_FS_to_BLOB_v4_PC2')]"
 			]
 		}
 	]

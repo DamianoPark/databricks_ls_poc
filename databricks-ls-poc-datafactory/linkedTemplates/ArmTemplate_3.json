@@ -1,0 +1,2994 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory 이름",
+			"defaultValue": "databricks-ls-poc-datafactory"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/1_WORKFLOW')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SRC_TO_BRZ",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2_SRC_TO_BRZ",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"WIND_STRT_TIME": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								},
+								"interface_id": {
+									"value": "@pipeline().parameters.interface_id",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRZ_TO_SIV",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "SRC_TO_BRZ",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3_BRZ_TO_SIV",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"WIND_STRT_TIME": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								},
+								"PIPELINE_NAME": {
+									"value": "@activity('SRC_TO_BRZ').output.pipelineName",
+									"type": "Expression"
+								},
+								"interface_id": {
+									"value": "@pipeline().parameters.interface_id",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SIL_TO_GOL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BRZ_TO_SIV",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "4_SIL_TO_GOL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"WIND_STRT_TIME": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								},
+								"PIPELINE_NAME": {
+									"value": "@activity('BRZ_TO_SIV').output.pipelineName",
+									"type": "Expression"
+								},
+								"interface_id": {
+									"value": "@pipeline().parameters.interface_id",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"interface_id": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/3. FRAMEWORK/FRAMEWORK"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-07T01:57:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BI_DASH')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "BI_DASH_KPI_MASTER",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "BI_DASH_KPI_MASTER",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "BI_DASH_HIERARCHY_MASTER",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_KPI_MASTER",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "BI_DASH_HIERARCHY_MASTER",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "BI_DASH_KPI_INPUT_EBIZ",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_EXCHANGE_RATE",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "BI_DASH_KPI_INPUT_EBIZ",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "BI_DASH_KPI_INPUT_MV_EXP",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_KPI_INPUT_EBIZ",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "BI_DASH_KPI_INPUT_MV_EXP",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "BI_DASH_CNSLD_DT",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_HIERARCHY_MASTER",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "BI_DASH_CNSLD_DT",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "BI_DASH_EXCHANGE_RATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_CNSLD_DT",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "BI_DASH_EXCHANGE_RATE",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_BI_DASH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-02-07T08:19:31Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BI_DASH_SP')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "BI_DASH_KPI_MASTER",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "T_BI_DASH_KPI_INPUT_MV_EXP",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": {
+									"value": "SP_T_BI_DASH_KPI_MASTER_N_C",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BI_DASH_KPI_INPUT",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_KPI_MASTER",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": {
+									"value": "SP_T_BI_DASH_KPI_INPUT_M_C",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BI_DASH_HIERARCHY_MASTER",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_KPI_INPUT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": {
+									"value": "SP_T_BI_DASH_HIERARCHY_MASTER_N_C",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "T_BI_DASH_KPI_INPUT_MV_EXP",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": {
+									"value": "SP_T_BI_DASH_KPI_INPUT_MV_EXP_N_C",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "T_FACT_FIN_SATTLEMENT_MONTHLY_FLAG",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "T_FACT_FIN_SATTLEMENT_RESULT_DATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_FACT_FIN_SATTLEMENT_MONTHLY_FLAG_M_C"
+							}
+						}
+					},
+					{
+						"name": "T_FACT_FIN_SATTLEMENT_RESULT_DATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_EXCHANGE_RATE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_FACT_FIN_SATTLEMENT_RESULT_DATE_M_C",
+								"FROM_INTERVAL": "0",
+								"TO_INTERVAL": "0"
+							}
+						}
+					},
+					{
+						"name": "BI_DASH_EXCHANGE_RATE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_DASH_HIERARCHY_MASTER",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": {
+									"value": "SP_T_BI_DASH_EXCHANGE_RATE_M_C",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_BI_DASH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2025-02-26T01:55:55Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CBATCH_SEQ_D_DM_06')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DM_CCT_AT_PLAN_INFORMATION",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_FACT_FIN_CCT_AT_PLAN_INFORMATION_N_C"
+							}
+						}
+					},
+					{
+						"name": "T_FACT_EPA_PROJECT_AMOUNT_MONTHLY",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_FACT_EPA_PROJECT_AMOUNT_MONTHLY_M_C"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_DM_06"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-08-17T05:20:23Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DW_IPD_MP_PROD_AMOUNT_C')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DW_IPD_MP_PROD_AMOUNT",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMMDD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_WIP_IPD_MP_PROD_AMOUNT_D_C"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_ODS_06"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-20T05:00:10Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_D_DW_ACT_610000')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DW_CCT_PJT_TSK_INFO",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_FIN_CCT_PJT_TSK_INFO_N_C"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_DW_06/SEQ_C_D_DW_ACT_610000"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-18T04:57:23Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_D_DW_MKT_610000')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DW_SMP_MP_SA_STAT",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMMDD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SMP_MP_SA_STAT_D_C"
+							}
+						}
+					},
+					{
+						"name": "DW_SPJ_PJT_TENDER_BIZ_STAT",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SPJ_PJT_TENDER_BIZ_STAT_N_C"
+							}
+						}
+					},
+					{
+						"name": "DW_SMP_RAW_MTL_WT_CHRG_SA",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SMP_RAW_MTL_WT_CHRG_SA_M_C",
+								"FROM_INTERVAL": "0",
+								"TO_INTERVAL": "0"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_DW_06/SEQ_C_D_DW_MKT_610000"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-18T04:57:23Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_D_DW_PRD_610000')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DW_IPO_BPA_UNIT_PRICE_STAT",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EPO_IPO_BPA_UNIT_PRICE_STAT_N_C"
+							}
+						}
+					},
+					{
+						"name": "DW_IPO_ITEM_RCV_ISSUE_STAT",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMMDD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EPO_IPO_ITEM_RCV_ISSUE_STAT_D_C"
+							}
+						}
+					},
+					{
+						"name": "DW_IST_ITEM_USAGE_TREND",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_IPO_ITEM_RCV_ISSUE_STAT",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMMDD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_WIP_IST_ITEM_USAGE_TREND_D_C",
+								"FROM_INTERVAL": "0",
+								"TO_INTERVAL": "0"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_DW_06/SEQ_C_D_DW_PRD_610000"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-18T04:57:23Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_D_OD_ERP_601002')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ERP_ECST_SALES_DETAILS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ERP_ECST_SALES_DETAILS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ECST_COST_RESULT",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ECST_COST_RESULT",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "EPO_TCOPQ_DATE_LOSS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EPO_TCOPQ_DATE_LOSS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "EOE_SALES_BATCH",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EOE_SALES_BATCH",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ECST_WIP_VALUE_HISTORIES",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ECST_WIP_VALUE_HISTORIES",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_ODS_06"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-11T05:07:25Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_D_DD_COM_010000')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DD_COM_CUSTOMER_MASTER",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DD_COM_CUSTOMER",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DIM_FND_COM_CUSTOMER_MASTER_N_C"
+							}
+						}
+					},
+					{
+						"name": "DD_COM_CUSTOMER",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DIM_FND_COM_CUSTOMER_N_C"
+							}
+						}
+					},
+					{
+						"name": "DD_COM_COA",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DIM_FND_COM_COA_N_C"
+							}
+						}
+					},
+					{
+						"name": "DD_COM_SLABOR_COST_CLASS",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DIM_FND_COM_SLABOR_COST_CLASS_N_C"
+							}
+						}
+					},
+					{
+						"name": "DD_COM_SLBR_COST_CLSS_COA",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DD_COM_SLABOR_COST_CLASS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DIM_FND_COM_SLBR_COST_CLSS_COA_N_C"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_00/CBATCH_SEQ_D_DD/SEQ_C_D_DD_COM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-26T01:20:45Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_M_DW_MKT_010000')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DW_SPJ_TENDER_BIZ_SA_COST",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					},
+					{
+						"name": "DW_SPJ_TB_BALANCE_STAT",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "DW_SPJ_TENDER_BIZ_SA_STAT",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					},
+					{
+						"name": "DW_SPJ_PTE_CONTROL",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "DW_SPJ_TB_BALANCE_STAT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					},
+					{
+						"name": "DW_SCO_CUST_SA_RSLT",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "DW_CCM_JOURNAL_LINE",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					},
+					{
+						"name": "DW_CCM_JOURNAL_HEADER",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_FIN_CCM_JOURNAL_HEADER_M_C"
+							}
+						}
+					},
+					{
+						"name": "DW_CCM_JOURNAL_LINE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_CCM_JOURNAL_HEADER",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_FIN_CCM_JOURNAL_LINE_M_C"
+							}
+						}
+					},
+					{
+						"name": "DW_SCO_AR_AGING_DOM_HIST",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SCO_AR_AGING_DOM_HIST_M_C"
+							}
+						}
+					},
+					{
+						"name": "DW_SCO_AR_AGING_EXP_HIST",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_SCO_AR_AGING_DOM_HIST",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SCO_AR_AGING_EXP_HIST_M_C"
+							}
+						}
+					},
+					{
+						"name": "DW_SCO_NEW_PRD_SA_STAT",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_IST_ITEM_USAGE_TREND",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SCO_NEW_PRD_SA_STAT_M_C"
+							}
+						}
+					},
+					{
+						"name": "DW_SCO_USD_SA_STAT_DETAIL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_SCO_CUST_SA_RSLT",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SCO_USD_SA_STAT_DETAIL_M_C"
+							}
+						}
+					},
+					{
+						"name": "DW_SPJ_TENDER_BIZ_SA_STAT",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_SPJ_TENDER_BIZ_SA_COST",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SPJ_TENDER_BIZ_SA_STAT_M_C"
+							}
+						}
+					},
+					{
+						"name": "DW_IST_ITEM_USAGE_TREND",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_SOP_PJT_DETAIL_INFO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SCO_NEW_PRD_PLN_M_C",
+								"FROM_INTERVAL": "0",
+								"TO_INTERVAL": "0"
+							}
+						}
+					},
+					{
+						"name": "DW_SOP_PJT_DETAIL_INFO",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "DW_SPJ_PTE_CONTROL",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_YYYYMM1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_DW_EOM_SOP_PJT_DETAIL_INFO_M_C"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_M/CBATCH_SEQ_M_DW/SEQ_C_M_DW_MKT"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-26T05:42:54Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/1_WORKFLOW1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SRC_TO_BRZ",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2_SRC_TO_BRZ1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"WIND_STRT_TIME": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								},
+								"interface_id": {
+									"value": "@pipeline().parameters.interface_id",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "BRZ_TO_SIV",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "SRC_TO_BRZ",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3_BRZ_TO_SIV1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"WIND_STRT_TIME": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								},
+								"PIPELINE_NAME": {
+									"value": "@activity('SRC_TO_BRZ').output.pipelineName",
+									"type": "Expression"
+								},
+								"interface_id": {
+									"value": "@pipeline().parameters.interface_id",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SIL_TO_GOL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BRZ_TO_SIV",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "4_SIL_TO_GOL1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"WIND_STRT_TIME": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								},
+								"PIPELINE_NAME": {
+									"value": "@activity('BRZ_TO_SIV').output.pipelineName",
+									"type": "Expression"
+								},
+								"interface_id": {
+									"value": "@pipeline().parameters.interface_id",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"interface_id": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/3. FRAMEWORK/FRAMEWORK"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-07T01:57:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CBATCH_SEQ_D_DW_06')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SEQ_C_D_DW_ACT_610000",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SEQ_C_D_DW_ACT_610000",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "SEQ_C_D_DW_MKT_610000",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "SEQ_C_D_DW_ACT_610000",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SEQ_C_D_DW_MKT_610000",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "SEQ_C_D_DW_PRD_610000",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SEQ_C_D_DW_PRD_610000",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_DW_06"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-18T04:57:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SEQ_C_D_DW_ACT_610000')]",
+				"[concat(variables('factoryId'), '/pipelines/SEQ_C_D_DW_MKT_610000')]",
+				"[concat(variables('factoryId'), '/pipelines/SEQ_C_D_DW_PRD_610000')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EHR_EMPLOYEES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TRUNCATE_BRIDGE",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "GET_CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_FRW_ASQL",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"SRC_SRV_NM": {
+									"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+									"type": "Expression"
+								},
+								"SRC_USER_NM": {
+									"value": "@pipeline().globalParameters.GP_META_USER_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_KVS_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "IF EXISTS (SELECT * FROM sys.objects WHERE 1=1 AND name = N'@{activity('GET_CFG').output.firstRow.source_object}' AND type = N'U')\nTRUNCATE TABLE [@{activity('GET_CFG').output.firstRow.source_object_schema}].[@{activity('GET_CFG').output.firstRow.source_object}]",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "GET_CFG",
+						"description": "Get migration table information from configuration table",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_FRW_ASQL_ALL",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().globalParameters.GP_META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "WORKFLOW",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "COMPLETED",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1_WORKFLOW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"interface_id": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SET_BODY",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "TRUNCATE_BRIDGE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "BODY",
+							"value": {
+								"value": "@concat('{\n    \"request\": {\n        \"header\": {\n            \"IF_ID\": \"',variables('IF_ID'),'\",\n            \"IF_GUUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_UUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_DATETIME\": \"',activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,'\"\n        },\n        \"body\": {\n            \"IF_TOTAL_CNT\": \"0\",\n            \"IF_SPLIT_CNT\": \"1\",\n            \"IF_SPLIT_SEQ\": \"1\",\n            \"IF_REQ_DATA\": [{}]\n        }\n    }\n}')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "REST_CALL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "SET_BODY",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('GET_CFG').output.firstRow.rest_call_url,'dev')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "WEB_PROD",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:07:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_PROD",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "WEB_DEV",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:10:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_DEV",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "COMPLETED",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "REST_CALL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EAI_COMPLETED",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"IF_ID": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								},
+								"IF_DATETIME": {
+									"value": "@activity('GET_CFG').output.firstRow.yyyyMMddHHmmss",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"DESCRIPTION": {
+						"type": "String",
+						"defaultValue": "GHR 임직원 정보"
+					},
+					"BODY": {
+						"type": "String",
+						"defaultValue": "-------- BODY --------"
+					},
+					"IF_ID": {
+						"type": "String",
+						"defaultValue": "IF_SRD_DPS_GHR_0004"
+					},
+					"IF_REQ_DATA": {
+						"type": "String",
+						"defaultValue": "-------- PARAM --------"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/1. EAI/GHR/FULL"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T02:54:26Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/1_WORKFLOW')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GHR_EHR_DP_EMPLOYEE_V')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TRUNCATE_BRIDGE",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "GET_CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_FRW_ASQL",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"SRC_SRV_NM": {
+									"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+									"type": "Expression"
+								},
+								"SRC_USER_NM": {
+									"value": "@pipeline().globalParameters.GP_META_USER_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_KVS_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "IF EXISTS (SELECT * FROM sys.objects WHERE 1=1 AND name = N'@{activity('GET_CFG').output.firstRow.source_object}' AND type = N'U')\nTRUNCATE TABLE [@{activity('GET_CFG').output.firstRow.source_object_schema}].[@{activity('GET_CFG').output.firstRow.source_object}]",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "GET_CFG",
+						"description": "Get migration table information from configuration table",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_FRW_ASQL_ALL",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().globalParameters.GP_META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "WORKFLOW",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "COMPLETED",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1_WORKFLOW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"interface_id": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SET_BODY",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "TRUNCATE_BRIDGE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "BODY",
+							"value": {
+								"value": "@concat('{\n    \"request\": {\n        \"header\": {\n            \"IF_ID\": \"',variables('IF_ID'),'\",\n            \"IF_GUUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_UUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_DATETIME\": \"',activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,'\"\n        },\n        \"body\": {\n            \"IF_TOTAL_CNT\": \"0\",\n            \"IF_SPLIT_CNT\": \"1\",\n            \"IF_SPLIT_SEQ\": \"1\",\n            \"IF_REQ_DATA\": [{}]\n        }\n    }\n}')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "REST_CALL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "SET_BODY",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('GET_CFG').output.firstRow.rest_call_url,'dev')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "WEB_PROD",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:07:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_PROD",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "WEB_DEV",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:10:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_DEV",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "COMPLETED",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "REST_CALL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EAI_COMPLETED",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"IF_ID": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								},
+								"IF_DATETIME": {
+									"value": "@activity('GET_CFG').output.firstRow.yyyyMMddHHmmss",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"DESCRIPTION": {
+						"type": "String",
+						"defaultValue": "GHR 사원 정보"
+					},
+					"BODY": {
+						"type": "String",
+						"defaultValue": "-------- BODY --------"
+					},
+					"IF_ID": {
+						"type": "String",
+						"defaultValue": "IF_SRD_DPS_GHR_0016"
+					},
+					"IF_REQ_DATA": {
+						"type": "String",
+						"defaultValue": "-------- PARAM --------"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/1. EAI/GHR/FULL"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-17T01:11:52Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/1_WORKFLOW')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PMS_RMS_PJT_MAP_TO_BI_V')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TRUNCATE_BRIDGE",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "GET_CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_FRW_ASQL",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"SRC_SRV_NM": {
+									"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+									"type": "Expression"
+								},
+								"SRC_USER_NM": {
+									"value": "@pipeline().globalParameters.GP_META_USER_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_KVS_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "IF EXISTS (SELECT * FROM sys.objects WHERE 1=1 AND name = N'@{activity('GET_CFG').output.firstRow.source_object}' AND type = N'U')\nTRUNCATE TABLE [@{activity('GET_CFG').output.firstRow.source_object_schema}].[@{activity('GET_CFG').output.firstRow.source_object}]",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "GET_CFG",
+						"description": "Get migration table information from configuration table",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_FRW_ASQL_ALL3",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().globalParameters.GP_META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "WORKFLOW",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "COMPLETED",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1_WORKFLOW1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"interface_id": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SET_BODY",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "TRUNCATE_BRIDGE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "BODY",
+							"value": {
+								"value": "@concat('{\n    \"request\": {\n        \"header\": {\n            \"IF_ID\": \"',variables('IF_ID'),'\",\n            \"IF_GUUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_UUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_DATETIME\": \"',activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,'\"\n        },\n        \"body\": {\n            \"IF_TOTAL_CNT\": \"0\",\n            \"IF_SPLIT_CNT\": \"1\",\n            \"IF_SPLIT_SEQ\": \"1\",\n            \"IF_REQ_DATA\": [{}]\n        }\n    }\n}')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "REST_CALL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "SET_BODY",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('GET_CFG').output.firstRow.rest_call_url,'dev')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "WEB_PROD",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:07:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_PROD",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "WEB_DEV",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:10:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_DEV",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "COMPLETED",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "REST_CALL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EAI_COMPLETED1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"IF_ID": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								},
+								"IF_DATETIME": {
+									"value": "@activity('GET_CFG').output.firstRow.yyyyMMddHHmmss",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"DESCRIPTION": {
+						"type": "String",
+						"defaultValue": "PMS 연구소 과제 매핑"
+					},
+					"BODY": {
+						"type": "String",
+						"defaultValue": "-------- BODY --------"
+					},
+					"IF_ID": {
+						"type": "String",
+						"defaultValue": "IF_SRD_DPS_PMS_0001"
+					},
+					"IF_REQ_DATA": {
+						"type": "String",
+						"defaultValue": "-------- PARAM --------"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/1. EAI/RMS/FULL"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T02:54:36Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/1_WORKFLOW1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BI_ORDER_ITEM_V')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TRUNCATE_BRIDGE",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "GET_CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LS_FRW_ASQL",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"SRC_SRV_NM": {
+									"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+									"type": "Expression"
+								},
+								"SRC_USER_NM": {
+									"value": "@pipeline().globalParameters.GP_META_USER_NM",
+									"type": "Expression"
+								},
+								"SRC_DB_KVS_NM": {
+									"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+									"type": "Expression"
+								}
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "IF EXISTS (SELECT * FROM sys.objects WHERE 1=1 AND name = N'@{activity('GET_CFG').output.firstRow.source_object}' AND type = N'U')\nTRUNCATE TABLE [@{activity('GET_CFG').output.firstRow.source_object_schema}].[@{activity('GET_CFG').output.firstRow.source_object}]",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "GET_CFG",
+						"description": "Get migration table information from configuration table",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_FRW_ASQL_ALL3",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().globalParameters.GP_META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "WORKFLOW",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "COMPLETED",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1_WORKFLOW1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"interface_id": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SET_BODY",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "TRUNCATE_BRIDGE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "BODY",
+							"value": {
+								"value": "@concat('{\n    \"request\": {\n        \"header\": {\n            \"IF_ID\": \"',variables('IF_ID'),'\",\n            \"IF_GUUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_UUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_DATETIME\": \"',activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,'\"\n        },\n        \"body\": {\n            \"IF_TOTAL_CNT\": \"0\",\n            \"IF_SPLIT_CNT\": \"1\",\n            \"IF_SPLIT_SEQ\": \"1\",\n            \"IF_REQ_DATA\": [{}]\n        }\n    }\n}')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "REST_CALL",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "SET_BODY",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('GET_CFG').output.firstRow.rest_call_url,'dev')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "WEB_PROD",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:07:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_PROD",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "WEB_DEV",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"httpRequestTimeout": "00:10:00",
+										"url": {
+											"value": "@pipeline().globalParameters.GP_EAI_URL_DEV",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "@{variables('BODY')}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "COMPLETED",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "REST_CALL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EAI_COMPLETED1",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"IF_ID": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								},
+								"IF_DATETIME": {
+									"value": "@activity('GET_CFG').output.firstRow.yyyyMMddHHmmss",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"DESCRIPTION": {
+						"type": "String",
+						"defaultValue": "RMS 연구소 프로젝트 품목 정보"
+					},
+					"BODY": {
+						"type": "String",
+						"defaultValue": "-------- BODY --------"
+					},
+					"IF_ID": {
+						"type": "String",
+						"defaultValue": "IF_SRD_DPS_RMS_0023"
+					},
+					"IF_REQ_DATA": {
+						"type": "String",
+						"defaultValue": "-------- PARAM --------"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/1. EAI/RMS/FULL"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-02T02:54:36Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/1_WORKFLOW1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_D_OD_GHR_610000')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "EHR_EMPLOYEES",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "EHR_EMPLOYEES",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "GHR_EHR_DP_EMPLOYEE_V",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "EHR_EMPLOYEES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "GHR_EHR_DP_EMPLOYEE_V",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_ODS_06"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-06T11:00:19Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/EHR_EMPLOYEES')]",
+				"[concat(variables('factoryId'), '/pipelines/GHR_EHR_DP_EMPLOYEE_V')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SEQ_C_M_OD_RMS_010000')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "PMS_RMS_PJT_MAP_TO_BI_V",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "BI_ORDER_ITEM_V",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PMS_RMS_PJT_MAP_TO_BI_V",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "BI_ORDER_ITEM_V",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "BI_ORDER_ITEM_V",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "OD_RMS_BI_ORDER_ITEM_SPL_V",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "PMS_RMS_PJT_MAP_TO_BI_V",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL2",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_RMS_BI_ORDER_ITEM_SPL_V_N_C"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_M/CBATCH_SEQ_M_ODS"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-02-10T01:09:57Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PMS_RMS_PJT_MAP_TO_BI_V')]",
+				"[concat(variables('factoryId'), '/pipelines/BI_ORDER_ITEM_V')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CBATCH_SEQ_D_ODS_06')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SEQ_C_D_OD_ERP_601002",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SEQ_C_D_OD_ERP_601002",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "DW_IPD_MP_PROD_AMOUNT_C",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "SEQ_C_D_OD_ERP_601002",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "DW_IPD_MP_PROD_AMOUNT_C",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "SEQ_C_D_OD_ERP_601001",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SEQ_C_D_OD_ERP_601001",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "SEQ_C_D_OD_GHR_610000",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SEQ_C_D_OD_GHR_610000",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "EIS_DYNA_DASH_DAILY_REPORT_C",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "SEQ_C_D_OD_ERP_601002",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SP_RUN_FULL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"RUN_PGM": "SP_T_EIS_DYNA_DASH_DAILY_REPORT_N_C"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2ND PROJECT/4. BATCH/CBATCH_SEQ_D_06/CBATCH_SEQ_D_ODS_06"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-01-11T05:07:27Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SEQ_C_D_OD_ERP_601002')]",
+				"[concat(variables('factoryId'), '/pipelines/DW_IPD_MP_PROD_AMOUNT_C')]",
+				"[concat(variables('factoryId'), '/pipelines/SEQ_C_D_OD_GHR_610000')]"
+			]
+		}
+	]
+}

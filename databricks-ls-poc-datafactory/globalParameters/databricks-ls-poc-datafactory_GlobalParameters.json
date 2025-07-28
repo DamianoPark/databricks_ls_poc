@@ -1,1 +1,86 @@
-{}
+{
+	"GP_META_SP_CHK_FILESHARE": {
+		"type": "string",
+		"value": "META.SP_CHECK_FILESHARE"
+	},
+	"GP_META_DB_SRV_NM": {
+		"type": "string",
+		"value": "ls-dp-sql.database.windows.net"
+	},
+	"GP_META_DB_NM": {
+		"type": "string",
+		"value": "sqldb-dataportal"
+	},
+	"GP_META_USER_NM": {
+		"type": "string",
+		"value": "lseadmin"
+	},
+	"GP_META_DB_KVS_NM": {
+		"type": "string",
+		"value": "KVS-FRW-META-ASQL"
+	},
+	"GP_META_TBL_NM": {
+		"type": "string",
+		"value": "Meta.LOAD_INV"
+	},
+	"GP_META_TBL_CLM_NM": {
+		"type": "string",
+		"value": "Tbl_nm"
+	},
+	"GP_DLS_URL": {
+		"type": "string",
+		"value": "https://lsdpadls.dfs.core.windows.net/"
+	},
+	"GP_DL_FS_NM": {
+		"type": "string",
+		"value": "lsdpadls"
+	},
+	"GP_DL_FS_KVS_NM": {
+		"type": "string",
+		"value": "KVS-FRW-FS-ADLS"
+	},
+	"GP_META_SP_INS_PIP_INFO": {
+		"type": "string",
+		"value": "Meta.SP_INS_RAW_PIP_INFO"
+	},
+	"GP_META_SP_FAIL_ACT": {
+		"type": "string",
+		"value": "Meta.SP_FAIL_ACT"
+	},
+	"GP_META_SP_UPD_MIG_FLG_INFO": {
+		"type": "string",
+		"value": "Meta.SP_DB_UPD_MIG_FLG_INFO"
+	},
+	"GP_BRIDGE_DB_NM": {
+		"type": "string",
+		"value": "sqldb-bridge"
+	},
+	"GP_BRIDGE_DB_KVS_NM": {
+		"type": "string",
+		"value": "PROD-KVS-FRW-BRIDGE-ASQL"
+	},
+	"GP_EAI_URL_DEV": {
+		"type": "string",
+		"value": "https://eaidev.ls-electric.com/service/rest"
+	},
+	"GP_EAI_URL_PROD": {
+		"type": "string",
+		"value": "https://eaiprod.ls-electric.com/service/rest"
+	},
+	"GP_LK_SRC_SRV_NM": {
+		"type": "string",
+		"value": "synw-datawarehouse-prod-001.sql.azuresynapse.net"
+	},
+	"GP_LK_SRC_DB_NM": {
+		"type": "string",
+		"value": "syndpdatawarehouse"
+	},
+	"GP_LK_SRC_USER_NM": {
+		"type": "string",
+		"value": "sqladminuser"
+	},
+	"GP_LK_SRC_DB_KVS_NM": {
+		"type": "string",
+		"value": "PROD-KVS-FRW-ADW-SYN"
+	}
+}

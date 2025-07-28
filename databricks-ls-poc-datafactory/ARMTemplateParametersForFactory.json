@@ -8,6 +8,9 @@
 		"ERP_ERPPROD_password": {
 			"value": ""
 		},
+		"LS_FRW_ASQL_password": {
+			"value": ""
+		},
 		"LS_NAS_password": {
 			"value": ""
 		},
@@ -23,11 +26,26 @@
 		"syndpdatawarehouse_password": {
 			"value": ""
 		},
+		"DS_FRW_ADLS_ALL_properties_typeProperties_fileName": {
+			"value": "@dataset().DLS_FN"
+		},
+		"DS_FRW_ADLS_ALL_properties_typeProperties_folderPath": {
+			"value": "@dataset().DLS_DR"
+		},
 		"ERP_ERPPROD_properties_typeProperties_server": {
 			"value": "165.244.241.132:1601/ERPPROD"
 		},
 		"ERP_ERPPROD_properties_typeProperties_username": {
 			"value": "LSISDATALAKE"
+		},
+		"LS_FRW_ASQL_properties_typeProperties_server": {
+			"value": "@{linkedService().SRC_SRV_NM}"
+		},
+		"LS_FRW_ASQL_properties_typeProperties_database": {
+			"value": "@{linkedService().SRC_DB_NM}"
+		},
+		"LS_FRW_ASQL_properties_typeProperties_userName": {
+			"value": "sqladmin"
 		},
 		"LS_NAS_properties_typeProperties_host": {
 			"value": "\\\\165.243.101.217\\data"
@@ -67,6 +85,12 @@
 		},
 		"ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId": {
 			"value": "/subscriptions/6964c315-93f4-43ed-9c55-ab9ff3d37dc3/resourcegroups/DataPlatform/providers/Microsoft.DataFactory/factories/ls-dp-adf/integrationruntimes/ls-dp-adf-ir-new"
+		},
+		"DS_FRW_ADLS_ALL1_properties_typeProperties_fileName": {
+			"value": "@dataset().DLS_FN"
+		},
+		"DS_FRW_ADLS_ALL1_properties_typeProperties_folderPath": {
+			"value": "@dataset().DLS_DR"
 		}
 	}
 }
