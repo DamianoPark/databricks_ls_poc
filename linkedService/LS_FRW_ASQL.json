@@ -20,7 +20,7 @@
 		"typeProperties": {
 			"server": "@{linkedService().SRC_SRV_NM}",
 			"database": "@{linkedService().SRC_DB_NM}",
-			"encrypt": "mandatory",
+			"encrypt": "optional",
 			"trustServerCertificate": false,
 			"authenticationType": "SQL",
 			"userName": "@{linkedService().SRC_USER_NM}",
@@ -30,7 +30,10 @@
 					"referenceName": "AzureKeyVault1",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "@linkedService().SRC_DB_KVS_NM"
+				"secretName": {
+					"value": "@linkedService().SRC_DB_KVS_NM",
+					"type": "Expression"
+				}
 			}
 		},
 		"connectVia": {
