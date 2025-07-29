@@ -31,7 +31,7 @@
 		"schema": [],
 		"typeProperties": {
 			"schema": "dbo",
-			"table": "V_DIM_FND_FINANCE_CODE_MST"
+			"table": "ETL_DATA_INSERT_LOG"
 		}
 	}
 }

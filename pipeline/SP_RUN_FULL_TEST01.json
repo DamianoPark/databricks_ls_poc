@@ -49,6 +49,101 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "SP_FULL",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GET_DATE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GET_DATE').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "SP_RUN_FULL",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@pipeline().parameters.RUN_PGM",
+									"type": "Expression"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_FRW_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().globalParameters.GP_LK_SRC_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().globalParameters.GP_LK_SRC_DB_NM",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "SP_COMPLETED",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "SP_RUN_FULL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "SP_COMPLETED",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"RUN_PGM": {
+										"value": "@pipeline().parameters.RUN_PGM",
+										"type": "Expression"
+									},
+									"START_DATE": {
+										"value": "@item().yyyyMMddHHmmss",
+										"type": "Expression"
+									},
+									"PARM_FROM": {
+										"value": "NULL",
+										"type": "Expression"
+									},
+									"PARM_TO": {
+										"value": "NULL",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
