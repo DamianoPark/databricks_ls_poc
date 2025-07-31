@@ -1,5 +1,5 @@
 {
-	"name": "DS_FRW_ASQL_ALL1",
+	"name": "DS_FRW_ASQL_ALL",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_FRW_ASQL",
