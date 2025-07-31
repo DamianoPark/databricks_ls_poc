@@ -204,13 +204,15 @@
 							],
 							"typeProperties": {
 								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "IF OBJECT_ID (N'[@{item().source_object_schema}].[@{item().source_object}]', N'U') IS NOT NULL\nselect * from [@{item().source_object_schema}].[@{item().source_object}] \n",
+									"type": "OracleSource",
+									"oracleReaderQuery": {
+										"value": "SELECT * \nFROM @{item().source_object_schema}.@{item().source_object}\nWHERE EXISTS (\n    SELECT 1 \n    FROM ALL_TAB_COLUMNS\n    WHERE OWNER = '@{item().source_object_schema}'\n      AND TABLE_NAME = '@{item().source_object}'\n)",
 										"type": "Expression"
 									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
+									"partitionOption": "None",
+									"numberPrecision": 38,
+									"numberScale": 18,
+									"queryTimeout": "02:00:00"
 								},
 								"sink": {
 									"type": "AzureBlobFSSink"
@@ -219,26 +221,8 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "DS_FRW_ASQL_ALL",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
+									"referenceName": "ERP_Oracle",
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
@@ -431,7 +415,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "IF OBJECT_ID (N'[@{item().source_object_schema}].[@{item().source_object}]', N'U') IS NOT NULL\nselect * from [@{item().source_object_schema}].[@{item().source_object}] \n",
+										"value": "SELECT * \nFROM @{item().source_object_schema}.@{item().source_object}\nWHERE EXISTS (\n    SELECT 1 \n    FROM ALL_TAB_COLUMNS\n    WHERE OWNER = '@{item().source_object_schema}'\n      AND TABLE_NAME = '@{item().source_object}'\n)\n",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -794,6 +778,22 @@
 										}
 									}
 								]
+							}
+						},
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"enableStaging": false
 							}
 						}
 					]
