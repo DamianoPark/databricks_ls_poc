@@ -210,8 +210,6 @@
 										"type": "Expression"
 									},
 									"partitionOption": "None",
-									"numberPrecision": 38,
-									"numberScale": 18,
 									"queryTimeout": "02:00:00"
 								},
 								"sink": {
