@@ -6,5 +6,6 @@
 		"typeProperties": {
 			"baseUrl": "https://kv-lse-datawarehouse.vault.azure.net/"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
