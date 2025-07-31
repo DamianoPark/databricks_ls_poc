@@ -83,35 +83,14 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "select COUNT(*) AS src_rec_cnt \nfrom @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object} \nWHERE 1=1\nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= '@{item().FROM_DT}' \nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < '@{item().TO_DT}' ",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
+									"type": "OracleSource",
+									"oracleReaderQuery": "SELECT \n    CASE \n        WHEN EXISTS (\n            SELECT 1 \n            FROM ALL_TABLES \n            WHERE OWNER = UPPER('@{item().source_object_schema}')\n              AND TABLE_NAME = UPPER('@{item().source_object}')\n        ) \n        THEN (\n            SELECT COUNT(*) \n            FROM @{item().source_object_schema}.@{item().source_object}\n        )\n        ELSE 0\n    END AS src_rec_cnt\nFROM DUAL\n",
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
 								},
 								"dataset": {
-									"referenceName": "DS_FRW_ASQL_ALL",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
+									"referenceName": "ERP_Oracle",
+									"type": "DatasetReference"
 								}
 							}
 						},
@@ -146,13 +125,10 @@
 							],
 							"typeProperties": {
 								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "select * \nfrom @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object} \nWHERE 1=1\nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= '@{item().FROM_DT}' \nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < '@{item().TO_DT}' ",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
+									"type": "OracleSource",
+									"oracleReaderQuery": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}\nWHERE 1=1\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE('@{item().FROM_DT}', 'YYYY-MM-DD')\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < TO_DATE('@{item().TO_DT}', 'YYYY-MM-DD')",
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
 								},
 								"sink": {
 									"type": "AzureBlobFSSink"
@@ -161,26 +137,8 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "DS_FRW_ASQL_ALL",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
+									"referenceName": "ERP_Oracle",
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
@@ -389,13 +347,10 @@
 							],
 							"typeProperties": {
 								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "select * \nfrom @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object} \nWHERE 1=1\nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= '@{item().FROM_DT}' \nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < '@{item().TO_DT}' ",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
+									"type": "OracleSource",
+									"oracleReaderQuery": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}\nWHERE 1=1\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE('@{item().FROM_DT}', 'YYYY-MM-DD')\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < TO_DATE('@{item().TO_DT}', 'YYYY-MM-DD')",
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
 								},
 								"sink": {
 									"type": "AzureBlobFSSink"
@@ -404,26 +359,8 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "DS_FRW_ASQL_ALL",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
+									"referenceName": "ERP_Oracle",
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
@@ -964,6 +901,9 @@
 				"defaultValue": "PROD-KVS-FRW-ADW-SYN"
 			},
 			"PIPELINE_NAME": {
+				"type": "string"
+			},
+			"source_object_schema": {
 				"type": "string"
 			}
 		},
