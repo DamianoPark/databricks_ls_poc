@@ -469,11 +469,11 @@
 			},
 			"DLS_URL": {
 				"type": "string",
-				"defaultValue": "https://lsdpadls.dfs.core.windows.net/"
+				"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
 			},
 			"DL_FS_NM": {
 				"type": "string",
-				"defaultValue": "lsdpadls"
+				"defaultValue": "databrickslspocsa"
 			},
 			"DL_DR_NM": {
 				"type": "string",
