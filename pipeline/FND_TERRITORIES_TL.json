@@ -260,6 +260,28 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "WORKFLOW_copy1",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "1_WORKFLOW",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"interface_id": {
+							"value": "@variables('IF_ID')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"variables": {
