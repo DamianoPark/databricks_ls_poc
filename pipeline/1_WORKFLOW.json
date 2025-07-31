@@ -24,7 +24,8 @@
 						"interface_id": {
 							"value": "@pipeline().parameters.interface_id",
 							"type": "Expression"
-						}
+						},
+						"source_object_schema": "@p"
 					}
 				}
 			},
@@ -105,6 +106,9 @@
 		],
 		"parameters": {
 			"interface_id": {
+				"type": "string"
+			},
+			"source_object_schema": {
 				"type": "string"
 			}
 		},
