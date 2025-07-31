@@ -6,9 +6,6 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"SRC_FS_KVS_NM": {
-				"type": "string"
-			},
 			"DLS_DR": {
 				"type": "string"
 			},
