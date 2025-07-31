@@ -1,0 +1,29 @@
+{
+	"name": "DS_FRW_ADW_ALL2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "syndpdatawarehouse",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SRC_SRV_NM": {
+				"type": "string"
+			},
+			"SRC_DB_NM": {
+				"type": "string"
+			},
+			"SRC_USER_NM": {
+				"type": "string"
+			},
+			"SRC_DB_KVS_NM": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "FRW_SRC_DS"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": []
+	}
+}
