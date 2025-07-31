@@ -411,13 +411,12 @@
 							],
 							"typeProperties": {
 								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "SELECT * \nFROM @{item().source_object_schema}.@{item().source_object}\nWHERE EXISTS (\n    SELECT 1 \n    FROM ALL_TAB_COLUMNS\n    WHERE OWNER = '@{item().source_object_schema}'\n      AND TABLE_NAME = '@{item().source_object}'\n)\n",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
+									"type": "OracleSource",
+									"oracleReaderQuery": "SELECT * \nFROM @{item().source_object_schema}.@{item().source_object}\nWHERE EXISTS (\n    SELECT 1 \n    FROM ALL_TAB_COLUMNS\n    WHERE OWNER = '@{item().source_object_schema}'\n      AND TABLE_NAME = '@{item().source_object}'\n)",
+									"partitionOption": "None",
+									"numberPrecision": 38,
+									"numberScale": 18,
+									"queryTimeout": "02:00:00"
 								},
 								"sink": {
 									"type": "AzureBlobFSSink"
@@ -426,26 +425,8 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "DS_FRW_ASQL_ALL",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
+									"referenceName": "ERP_Oracle",
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
