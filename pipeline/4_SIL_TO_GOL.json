@@ -1,0 +1,526 @@
+{
+	"name": "4_SIL_TO_GOL",
+	"properties": {
+		"description": "This pipeline is used to migrate source table to data lake(Curated) with full copy support. Pipeline is using value of source name and table name in configuration table. ",
+		"activities": [
+			{
+				"name": "GET_CFG",
+				"description": "Get migration table information from configuration table",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "GET_TIME",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT   MAIN.[load_id]\n        ,MAIN.[source_name]\n        ,MAIN.[source]\n        ,MAIN.[interface_id]\n        ,MAIN.[interface_name]\n        ,MAIN.[load_type]\n        ,MAIN.[source_object]\n        ,MAIN.[source_field]\n        ,MAIN.[source_condition]\n        ,MAIN.[target_object]\n        ,MAIN.[target_field]\n        ,MAIN.[target_condition]\n        ,MAIN.[from]\n        ,MAIN.[to]\n        ,MAIN.[interval_type]\n        ,MAIN.[r_mig_flg]\n        ,MAIN.[b_mig_flg]\n        ,MAIN.[c_mig_flg]\n        ,MAIN.[usecase_id]\n        ,MAIN.[src_sys_id]\n        ,MAIN.[trigger_id]\n        ,MAIN.[rest_call_url]\n        ,MAIN.[synapse_object]\n        ,MAIN.[synapse_object_type]\n        ,SUB.[pip_nm]\n        ,SUB.[src_rec_cnt]\n        ,SUB.[copy_status]\n        ,SUB.[dl_rec_cnt]\n        ,SUB.[dl_fs_nm]\n        ,SUB.[dl_dr_nm]\n        ,SUB.[dl_fl_nm]\n        ,SUB.[error_msg]\n        ,SUB.[zone_info]\n  FROM [META].[LOAD_INV_EAI] MAIN\n  JOIN (\n  SELECT\n       [usecase_id]\n      ,[load_id]\n      ,[pip_nm]\n      ,[src_rec_cnt]\n      ,[copy_status]\n      ,[dl_rec_cnt]\n      ,[dl_fs_nm]\n      ,[dl_dr_nm]\n      ,[dl_fl_nm]\n      ,[error_msg]\n      ,[zone_info]\n  FROM [META].[LOG_INV]\n  WHERE 1=1\n  --AND [dl_rec_cnt] > 0 \n  AND [copy_status] = 'Succeeded' \n  AND [dl_dr_nm] like '%/Latest/%'\n  AND convert(varchar, [start_time] , 120) = LEFT(REPLACE('@{pipeline().parameters.WIND_STRT_TIME}' , 'T' , ' '),19) ) SUB  \n  ON MAIN.load_id = SUB.load_id\n  WHERE 1=1\n  AND MAIN.[C_mig_flg] = 1\n  AND MAIN.[interface_id] = '@{pipeline().parameters.interface_id}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_FRW_ASQL_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().parameters.META_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().parameters.META_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().parameters.META_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().parameters.META_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FOR_EACH",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GET_CFG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GET_CFG').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "GET_JOB_TIME",
+							"description": "This activity is used to initialize TIME variable with pipeline start time",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "JOB_TIME",
+								"value": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Trans to GOLD",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "GET_JOB_TIME",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "00:30:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureBlobFSSource",
+									"recursive": true
+								},
+								"sink": {
+									"type": "AzureBlobFSSink"
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_FRW_ADLS_ALL",
+									"type": "DatasetReference",
+									"parameters": {
+										"SRC_FS_KVS_NM": {
+											"value": "@pipeline().parameters.DL_FS_KVS_NM",
+											"type": "Expression"
+										},
+										"DLS_DR": {
+											"value": "@{pipeline().parameters.SRC_DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}/",
+											"type": "Expression"
+										},
+										"DLS_FN": {
+											"value": "@{item().DL_FL_NM}",
+											"type": "Expression"
+										},
+										"DLS_URL": {
+											"value": "@pipeline().parameters.DLS_URL",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_FRW_ADLS_ALL",
+									"type": "DatasetReference",
+									"parameters": {
+										"SRC_FS_KVS_NM": {
+											"value": "@pipeline().parameters.DL_FS_KVS_NM",
+											"type": "Expression"
+										},
+										"DLS_DR": {
+											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}/",
+											"type": "Expression"
+										},
+										"DLS_FN": {
+											"value": "@{item().DL_FL_NM}",
+											"type": "Expression"
+										},
+										"DLS_URL": {
+											"value": "@pipeline().parameters.DLS_URL",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "SP_INS_RAW_PIP_INFO",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Trans to GOLD",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@pipeline().parameters.SP_INS_PIP_INFO",
+									"type": "Expression"
+								},
+								"storedProcedureParameters": {
+									"copy_status": {
+										"value": {
+											"value": "@{activity('Trans to GOLD').output.executionDetails[0].status}",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"dl_dr_nm": {
+										"value": {
+											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}/",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"dl_fl_nm": {
+										"value": {
+											"value": "@{item().DL_FL_NM}",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"dl_fs_nm": {
+										"value": {
+											"value": "@pipeline().parameters.DL_FS_NM",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"dl_rec_cnt": {
+										"value": {
+											"value": "@item().src_rec_cnt",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"end_time": {
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"load_id": {
+										"value": {
+											"value": "@item().load_id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"load_time": {
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"mig_clm_nm": {
+										"value": "c_mig_flg",
+										"type": "String"
+									},
+									"pip_nm": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"src_rec_cnt": {
+										"value": {
+											"value": "@item().SRC_REC_CNT",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"start_time": {
+										"value": {
+											"value": "@activity('Trans to GOLD').output.executionDetails[0].start",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"usecase_id": {
+										"value": {
+											"value": "@item().usecase_id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"zone": {
+										"value": "Gold",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_FRW_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().parameters.META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().parameters.META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().parameters.META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().parameters.META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "SP_FAIL_ACT",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Trans to GOLD",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@pipeline().parameters.SP_FAIL_ACT",
+									"type": "Expression"
+								},
+								"storedProcedureParameters": {
+									"copy_status": {
+										"value": {
+											"value": "@activity('Trans to GOLD').output.executionDetails[0].status",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"error_msg": {
+										"value": {
+											"value": "Trans to GOLD activity has failed, ErrorCode :@{activity('Trans to GOLD').Error.errorCode}",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"load_id": {
+										"value": {
+											"value": "@item().load_id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"pip_nm": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"run_id": {
+										"value": {
+											"value": "@pipeline().RunId",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"src_rec_cnt": {
+										"value": {
+											"value": "@item().SRC_REC_CNT",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"usecase_id": {
+										"value": {
+											"value": "@item().usecase_id",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"zone": {
+										"value": "Gold",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_FRW_ASQL",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().parameters.META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().parameters.META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().parameters.META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().parameters.META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "GET_TIME",
+				"description": "This activity is used to initialize TIME variable with pipeline start time",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "TIME",
+					"value": {
+						"value": "@replace(replace(pipeline().parameters.WIND_STRT_TIME,':',''),'-','')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"META_DB_SRV_NM": {
+				"type": "string",
+				"defaultValue": "ls-dp-sql.database.windows.net"
+			},
+			"META_DB_NM": {
+				"type": "string",
+				"defaultValue": "sqldb-dataportal"
+			},
+			"META_USER_NM": {
+				"type": "string",
+				"defaultValue": "lseadmin"
+			},
+			"META_DB_KVS_NM": {
+				"type": "string",
+				"defaultValue": "KVS-FRW-META-ASQL"
+			},
+			"DLS_URL": {
+				"type": "string",
+				"defaultValue": "https://lsdpadls.dfs.core.windows.net/"
+			},
+			"DL_FS_NM": {
+				"type": "string",
+				"defaultValue": "lsdpadls"
+			},
+			"DL_DR_NM": {
+				"type": "string",
+				"defaultValue": "gold"
+			},
+			"DL_FS_KVS_NM": {
+				"type": "string",
+				"defaultValue": "KVS-FRW-FS-ADLS"
+			},
+			"SRC_NM": {
+				"type": "string",
+				"defaultValue": "BRIDGE"
+			},
+			"SRC_DL_DR_NM": {
+				"type": "string",
+				"defaultValue": "silver"
+			},
+			"SP_INS_PIP_INFO": {
+				"type": "string",
+				"defaultValue": "Meta.SP_INS_RAW_PIP_INFO"
+			},
+			"SP_FAIL_ACT": {
+				"type": "string",
+				"defaultValue": "Meta.SP_FAIL_ACT"
+			},
+			"SP_UPD_MIG_FLG_INFO": {
+				"type": "string",
+				"defaultValue": "Meta.SP_DB_UPD_MIG_FLG_INFO"
+			},
+			"WIND_STRT_TIME": {
+				"type": "string"
+			},
+			"PIPELINE_NAME": {
+				"type": "string"
+			},
+			"interface_id": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"TIME": {
+				"type": "String"
+			},
+			"JOB_TIME": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "2ND PROJECT/3. FRAMEWORK/FRAMEWORK"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-12-06T01:00:27Z"
+	}
+}
