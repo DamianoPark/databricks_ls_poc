@@ -74,6 +74,10 @@
 						"interface_id": {
 							"value": "@variables('IF_ID')",
 							"type": "Expression"
+						},
+						"source_object_schema": {
+							"value": "@variables('source_object_schema')",
+							"type": "Expression"
 						}
 					}
 				}
