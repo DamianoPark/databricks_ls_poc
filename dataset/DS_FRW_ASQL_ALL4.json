@@ -12,7 +12,9 @@
 				"SRC_DB_NM": {
 					"value": "@dataset().SRC_DB_NM",
 					"type": "Expression"
-				}
+				},
+				"SRC_USER_NM": "@dataset().SRC_USER_NM",
+				"SRC_DB_KVS_NM": "@dataset().SRC_DB_KVS_NM"
 			}
 		},
 		"parameters": {
