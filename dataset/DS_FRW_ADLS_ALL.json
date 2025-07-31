@@ -23,7 +23,12 @@
 		"type": "AzureBlobFSFile",
 		"typeProperties": {
 			"format": {
-				"type": "ParquetFormat"
+				"type": "TextFormat",
+				"columnDelimiter": ",",
+				"rowDelimiter": "",
+				"treatEmptyAsNull": true,
+				"skipLineCount": 0,
+				"firstRowAsHeader": false
 			},
 			"fileName": {
 				"value": "@dataset().DLS_FN",
