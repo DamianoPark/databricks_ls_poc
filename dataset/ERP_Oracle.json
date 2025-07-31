@@ -1,0 +1,16 @@
+{
+	"name": "ERP_Oracle",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ERP_ERPPROD",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "APPLSYS",
+			"table": "FND_TERRITORIES_TL"
+		}
+	}
+}
