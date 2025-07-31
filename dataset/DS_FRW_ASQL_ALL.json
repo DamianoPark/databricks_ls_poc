@@ -42,6 +42,10 @@
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
-		"schema": []
+		"schema": [],
+		"typeProperties": {
+			"schema": "EBIZ",
+			"table": "BP_InqSalesPlanByItem"
+		}
 	}
 }
