@@ -141,35 +141,16 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "AzureSqlSource",
-									"sqlReaderQuery": {
-										"value": "IF OBJECT_ID ('[@{item().source_object_schema}].[@{item().source_object}]') IS NOT NULL\nselect COUNT(*) AS src_rec_cnt from [@{item().source_object_schema}].[@{item().source_object}] \nIF OBJECT_ID ('[@{item().source_object_schema}].[@{item().source_object}]') IS NULL\nselect 0 AS src_rec_cnt",
-										"type": "Expression"
-									},
-									"queryTimeout": "02:00:00",
-									"partitionOption": "None"
+									"type": "OracleSource",
+									"oracleReaderQuery": "SELECT \n    CASE \n        WHEN EXISTS (\n            SELECT 1 \n            FROM ALL_TABLES \n            WHERE OWNER = UPPER('@{item().source_object_schema}')\n              AND TABLE_NAME = UPPER('@{item().source_object}')\n        ) \n        THEN (\n            SELECT COUNT(*) \n            FROM @{item().source_object_schema}.@{item().source_object}\n        )\n        ELSE 0\n    END AS src_rec_cnt\nFROM DUAL",
+									"partitionOption": "None",
+									"numberPrecision": 38,
+									"numberScale": 18,
+									"queryTimeout": "02:00:00"
 								},
 								"dataset": {
-									"referenceName": "DS_FRW_ASQL_ALL",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
+									"referenceName": "ERP_Oracle",
+									"type": "DatasetReference"
 								}
 							}
 						},
