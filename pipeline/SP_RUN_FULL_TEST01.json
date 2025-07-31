@@ -17,36 +17,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": {
-							"value": "SELECT FORMAT(DATEADD(HOUR, 9 ,GETDATE()), 'yyyyMMddHHmmss') AS 'yyyyMMddHHmmss', FORMAT(DATEADD(HOUR, 9 ,GETDATE()), 'yyyy-MM-dd') AS 'yyyyMMdd'\n",
-							"type": "Expression"
-						},
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "DS_FRW_ASQL_ALL",
-						"type": "DatasetReference",
-						"parameters": {
-							"SRC_SRV_NM": {
-								"value": "@pipeline().globalParameters.GP_LK_SRC_SRV_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_NM": {
-								"value": "@pipeline().globalParameters.GP_LK_SRC_DB_NM",
-								"type": "Expression"
-							},
-							"SRC_USER_NM": {
-								"value": "@pipeline().globalParameters.GP_LK_SRC_USER_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_KVS_NM": {
-								"value": "@pipeline().globalParameters.GP_LK_SRC_DB_KVS_NM",
-								"type": "Expression"
-							}
-						}
-					},
 					"firstRowOnly": false
 				}
 			},

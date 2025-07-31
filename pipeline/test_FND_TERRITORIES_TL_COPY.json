@@ -1,54 +1,9 @@
 {
-	"name": "FND_TERRITORIES_TL_copy_test",
+	"name": "test_FND_TERRITORIES_TL_COPY",
 	"properties": {
 		"activities": [
 			{
-				"name": "TRUNCATE_BRIDGE",
-				"type": "Script",
-				"dependsOn": [
-					{
-						"activity": "GET_CFG",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "LS_FRW_ASQL",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"SRC_SRV_NM": {
-							"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
-							"type": "Expression"
-						},
-						"SRC_DB_NM": {
-							"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
-							"type": "Expression"
-						}
-					}
-				},
-				"typeProperties": {
-					"scripts": [
-						{
-							"type": "Query",
-							"text": {
-								"value": "IF EXISTS (SELECT * FROM sys.objects WHERE 1=1 AND name = N'@{activity('GET_CFG').output.firstRow.source_object}' AND type = N'U')\nTRUNCATE TABLE [@{activity('GET_CFG').output.firstRow.source_object_schema}].[@{activity('GET_CFG').output.firstRow.source_object}]",
-								"type": "Expression"
-							}
-						}
-					]
-				}
-			},
-			{
-				"name": "GET_CFG",
+				"name": "GET_CFG_copy1",
 				"description": "Get migration table information from configuration table",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -63,43 +18,28 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": {
-							"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
-							"type": "Expression"
-						},
+						"sqlReaderQuery": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
 						"partitionOption": "None"
 					},
 					"dataset": {
-						"referenceName": "DS_FRW_ASQL_ALL4",
+						"referenceName": "DS_FRW_ASQL_ALL",
 						"type": "DatasetReference",
 						"parameters": {
-							"SRC_SRV_NM": {
-								"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_NM": {
-								"value": "@pipeline().globalParameters.GP_META_DB_NM",
-								"type": "Expression"
-							},
-							"SRC_USER_NM": {
-								"value": "@pipeline().globalParameters.GP_META_USER_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_KVS_NM": {
-								"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
-								"type": "Expression"
-							}
+							"SRC_SRV_NM": "@dataset().SRC_SRV_NM",
+							"SRC_DB_NM": "@dataset().SRC_DB_NM",
+							"SRC_USER_NM": "@dataset().SRC_USER_NM",
+							"SRC_DB_KVS_NM": "@dataset().SRC_DB_KVS_NM"
 						}
 					},
 					"firstRowOnly": true
 				}
 			},
 			{
-				"name": "WORKFLOW",
+				"name": "SRC_TO_BRZ",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "COMPLETED",
+						"activity": "GET_CFG_copy1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -111,143 +51,91 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "1_WORKFLOW2",
+						"referenceName": "2_SRC_TO_BRZ2",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"interface_id": {
-							"value": "@variables('IF_ID')",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "SET_BODY",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "TRUNCATE_BRIDGE",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "BODY",
-					"value": {
-						"value": "@concat('{\n    \"request\": {\n        \"header\": {\n            \"IF_ID\": \"',variables('IF_ID'),'\",\n            \"IF_GUUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_UUID\": \"',activity('GET_CFG').output.firstRow.ID,'\",\n            \"IF_DATETIME\": \"',activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,'\"\n        },\n        \"body\": {\n            \"IF_TOTAL_CNT\": \"0\",\n            \"IF_SPLIT_CNT\": \"1\",\n            \"IF_SPLIT_SEQ\": \"1\",\n            \"IF_REQ_DATA\": [{}]\n        }\n    }\n}')",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "REST_CALL",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "SET_BODY",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@equals(activity('GET_CFG').output.firstRow.rest_call_url,'dev')",
-						"type": "Expression"
-					},
-					"ifFalseActivities": [
-						{
-							"name": "WEB_PROD",
-							"type": "WebActivity",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"method": "POST",
-								"httpRequestTimeout": "00:07:00",
-								"url": {
-									"value": "@pipeline().globalParameters.GP_EAI_URL_PROD",
-									"type": "Expression"
-								},
-								"body": {
-									"value": "@{variables('BODY')}",
-									"type": "Expression"
-								}
-							}
-						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "WEB_DEV",
-							"type": "WebActivity",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"method": "POST",
-								"httpRequestTimeout": "00:10:00",
-								"url": {
-									"value": "@pipeline().globalParameters.GP_EAI_URL_DEV",
-									"type": "Expression"
-								},
-								"body": {
-									"value": "@{variables('BODY')}",
-									"type": "Expression"
-								}
-							}
-						}
-					]
-				}
-			},
-			{
-				"name": "COMPLETED",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "REST_CALL",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "EAI_COMPLETED2",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"IF_ID": {
-							"value": "@variables('IF_ID')",
+						"WIND_STRT_TIME": {
+							"value": "@pipeline().TriggerTime",
 							"type": "Expression"
 						},
-						"IF_DATETIME": {
-							"value": "@activity('GET_CFG').output.firstRow.yyyyMMddHHmmss",
+						"interface_id": {
+							"value": "@pipeline().parameters.interface_id",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "BRZ_TO_SIV",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SRC_TO_BRZ",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3_BRZ_TO_SIV2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"WIND_STRT_TIME": {
+							"value": "@pipeline().TriggerTime",
+							"type": "Expression"
+						},
+						"PIPELINE_NAME": {
+							"value": "@activity('SRC_TO_BRZ').output.pipelineName",
+							"type": "Expression"
+						},
+						"interface_id": {
+							"value": "@pipeline().parameters.interface_id",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "SIL_TO_GOL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "BRZ_TO_SIV",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "4_SIL_TO_GOL2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"WIND_STRT_TIME": {
+							"value": "@pipeline().TriggerTime",
+							"type": "Expression"
+						},
+						"PIPELINE_NAME": {
+							"value": "@activity('BRZ_TO_SIV').output.pipelineName",
+							"type": "Expression"
+						},
+						"interface_id": {
+							"value": "@pipeline().parameters.interface_id",
 							"type": "Expression"
 						}
 					}

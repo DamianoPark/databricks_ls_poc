@@ -32,28 +32,6 @@
 						},
 						"partitionOption": "None"
 					},
-					"dataset": {
-						"referenceName": "DS_FRW_ASQL_ALL3",
-						"type": "DatasetReference",
-						"parameters": {
-							"SRC_SRV_NM": {
-								"value": "@pipeline().parameters.META_DB_SRV_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_NM": {
-								"value": "@pipeline().parameters.META_DB_NM",
-								"type": "Expression"
-							},
-							"SRC_USER_NM": {
-								"value": "@pipeline().parameters.META_DB_USER_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_KVS_NM": {
-								"value": "@pipeline().parameters.META_DB_KVS_NM",
-								"type": "Expression"
-							}
-						}
-					},
 					"firstRowOnly": false
 				}
 			},
@@ -148,28 +126,6 @@
 									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
-								},
-								"dataset": {
-									"referenceName": "DS_FRW_ASQL_ALL3",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
 								}
 							}
 						},
@@ -217,30 +173,6 @@
 								},
 								"enableStaging": false
 							},
-							"inputs": [
-								{
-									"referenceName": "DS_FRW_ASQL_ALL3",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
-								}
-							],
 							"outputs": [
 								{
 									"referenceName": "DS_FRW_ADLS_ALL1",
@@ -458,30 +390,6 @@
 								},
 								"enableStaging": false
 							},
-							"inputs": [
-								{
-									"referenceName": "DS_FRW_ASQL_ALL3",
-									"type": "DatasetReference",
-									"parameters": {
-										"SRC_SRV_NM": {
-											"value": "@pipeline().parameters.SRC_DB_SRV_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_NM": {
-											"value": "@pipeline().parameters.SRC_DB_NM",
-											"type": "Expression"
-										},
-										"SRC_USER_NM": {
-											"value": "@pipeline().parameters.SRC_DB_USR_NM",
-											"type": "Expression"
-										},
-										"SRC_DB_KVS_NM": {
-											"value": "@pipeline().parameters.SRC_DB_KVS_NM",
-											"type": "Expression"
-										}
-									}
-								}
-							],
 							"outputs": [
 								{
 									"referenceName": "DS_FRW_ADLS_ALL1",
