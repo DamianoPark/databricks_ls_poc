@@ -391,28 +391,6 @@
 										"type": "String"
 									}
 								}
-							},
-							"linkedServiceName": {
-								"referenceName": "LS_FRW_ASQL",
-								"type": "LinkedServiceReference",
-								"parameters": {
-									"SRC_SRV_NM": {
-										"value": "@pipeline().parameters.META_DB_SRV_NM",
-										"type": "Expression"
-									},
-									"SRC_DB_NM": {
-										"value": "@pipeline().parameters.META_DB_NM",
-										"type": "Expression"
-									},
-									"SRC_USER_NM": {
-										"value": "@pipeline().parameters.META_DB_USER_NM",
-										"type": "Expression"
-									},
-									"SRC_DB_KVS_NM": {
-										"value": "@pipeline().parameters.META_DB_KVS_NM",
-										"type": "Expression"
-									}
-								}
 							}
 						},
 						{
@@ -807,6 +785,19 @@
 									}
 								]
 							}
+						},
+						{
+							"name": "Notebook1",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
 						}
 					]
 				}
