@@ -25,13 +25,18 @@
 							"value": "@pipeline().parameters.interface_id",
 							"type": "Expression"
 						},
-						"source_object_schema": "@p"
+						"source_object_schema": {
+							"value": "@pipeline().parameters.source_object_schema",
+							"type": "Expression"
+						}
 					}
 				}
 			},
 			{
 				"name": "BRZ_TO_SIV",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "SRC_TO_BRZ",
@@ -69,6 +74,8 @@
 			{
 				"name": "SIL_TO_GOL",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "BRZ_TO_SIV",
