@@ -85,7 +85,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "SELECT \n    CASE \n        WHEN EXISTS (\n            SELECT 1 \n            FROM ALL_TABLES \n            WHERE OWNER = UPPER('@{pipeline().parameters.source_object_schema}')\n              AND TABLE_NAME = UPPER('@{item().source_object}')\n        ) \n        THEN (\n            SELECT COUNT(*) \n            FROM @{item().source_object_schema}.@{item().source_object}\n        )\n        ELSE 0\n    END AS src_rec_cnt\nFROM DUAL",
+										"value": "SELECT \n    CASE \n        WHEN EXISTS (\n            SELECT 1 \n            FROM ALL_TABLES \n            WHERE OWNER = UPPER('@{pipeline().parameters.source_object_schema}')\n              AND TABLE_NAME = UPPER('@{item().source_object}')\n        ) \n        THEN (\n            SELECT COUNT(*) \n            FROM @{pipeline().parameters.source_object_schema}.@{item().source_object}\n        )\n        ELSE 0\n    END AS src_rec_cnt\nFROM DUAL\n",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
