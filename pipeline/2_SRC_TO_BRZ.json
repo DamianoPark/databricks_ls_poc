@@ -269,6 +269,8 @@
 						{
 							"name": "SP_INS_RAW_PIP_INFO_LOG",
 							"type": "SqlServerStoredProcedure",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "COPY_TO_ADLS_LOG",
@@ -492,6 +494,8 @@
 						{
 							"name": "SP_INS_RAW_PIP_INFO",
 							"type": "SqlServerStoredProcedure",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "COPY_TO_ADLS",
@@ -641,6 +645,8 @@
 						{
 							"name": "LOG",
 							"type": "IfCondition",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "COPY_TO_ADLS",
