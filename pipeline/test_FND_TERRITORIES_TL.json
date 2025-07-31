@@ -83,6 +83,10 @@
 			"IF_ID": {
 				"type": "String",
 				"defaultValue": "IF_SRD_DPS_ERP_0061"
+			},
+			"DESCRIPTION": {
+				"type": "String",
+				"defaultValue": "국가및 권역정"
 			}
 		},
 		"folder": {
