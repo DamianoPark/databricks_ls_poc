@@ -81,7 +81,8 @@
 		],
 		"variables": {
 			"IF_ID": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "IF_SRD_DPS_ERP_0061"
 			}
 		},
 		"folder": {
