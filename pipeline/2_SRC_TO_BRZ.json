@@ -414,8 +414,6 @@
 									"type": "OracleSource",
 									"oracleReaderQuery": "SELECT * \nFROM @{item().source_object_schema}.@{item().source_object}\nWHERE EXISTS (\n    SELECT 1 \n    FROM ALL_TAB_COLUMNS\n    WHERE OWNER = '@{item().source_object_schema}'\n      AND TABLE_NAME = '@{item().source_object}'\n)",
 									"partitionOption": "None",
-									"numberPrecision": 38,
-									"numberScale": 18,
 									"queryTimeout": "02:00:00"
 								},
 								"sink": {
