@@ -190,7 +190,7 @@
 								"source": {
 									"type": "OracleSource",
 									"oracleReaderQuery": {
-										"value": "SELECT * \nFROM @{item().source_object_schema}.@{item().source_object}\nWHERE EXISTS (\n    SELECT 1 \n    FROM ALL_TAB_COLUMNS\n    WHERE OWNER = '@{item().source_object_schema}'\n      AND TABLE_NAME = '@{item().source_object}'\n)",
+										"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{item().source_object}\nWHERE EXISTS (\n    SELECT 1 \n    FROM ALL_TAB_COLUMNS\n    WHERE OWNER = '@{pipeline().parameters.source_object_schema}'\n      AND TABLE_NAME = '@{item().source_object}'\n)",
 										"type": "Expression"
 									},
 									"partitionOption": "None",
