@@ -193,6 +193,8 @@
 						{
 							"name": "SP_INS_RAW_PIP_INFO",
 							"type": "SqlServerStoredProcedure",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Trans to Silver",
@@ -342,6 +344,8 @@
 						{
 							"name": "SP_FAIL_ACT",
 							"type": "SqlServerStoredProcedure",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Trans to Silver",
