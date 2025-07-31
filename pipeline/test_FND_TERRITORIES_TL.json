@@ -87,6 +87,10 @@
 			"DESCRIPTION": {
 				"type": "String",
 				"defaultValue": "국가및 권역정"
+			},
+			"source_object_schema": {
+				"type": "String",
+				"defaultValue": "APPLSYS"
 			}
 		},
 		"folder": {
