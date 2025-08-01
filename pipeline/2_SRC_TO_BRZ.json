@@ -212,16 +212,12 @@
 									"referenceName": "DS_FRW_ADLS_ALL",
 									"type": "DatasetReference",
 									"parameters": {
-										"SRC_FS_KVS_NM": {
-											"value": "@pipeline().parameters.DL_FS_KVS_NM",
-											"type": "Expression"
-										},
 										"DLS_DR": {
 											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}-ALL/@{variables('TIME')}",
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@{item().source_object}.snappy.parquet",
+											"value": "@{item().source_object}.csv",
 											"type": "Expression"
 										},
 										"DLS_URL": {
@@ -419,10 +415,6 @@
 									"referenceName": "DS_FRW_ADLS_ALL",
 									"type": "DatasetReference",
 									"parameters": {
-										"SRC_FS_KVS_NM": {
-											"value": "@pipeline().parameters.DL_FS_KVS_NM",
-											"type": "Expression"
-										},
 										"DLS_DR": {
 											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}-ALL/Latest/",
 											"type": "Expression"
