@@ -420,7 +420,7 @@
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@{item().source_object}.snappy.parquet",
+											"value": "@{item().source_object}.tsv",
 											"type": "Expression"
 										},
 										"DLS_URL": {
