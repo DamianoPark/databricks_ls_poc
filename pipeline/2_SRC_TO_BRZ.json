@@ -217,7 +217,7 @@
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@{item().source_object}.tsv",
+											"value": "@{item().source_object}.snappy.parquet",
 											"type": "Expression"
 										},
 										"DLS_URL": {
@@ -420,7 +420,7 @@
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@{item().source_object}.tsv",
+											"value": "@{item().source_object}.snappy.parquet",
 											"type": "Expression"
 										},
 										"DLS_URL": {
