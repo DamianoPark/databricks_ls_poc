@@ -35,8 +35,6 @@
 			{
 				"name": "BRZ_TO_SIV",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "SRC_TO_BRZ",
@@ -74,8 +72,6 @@
 			{
 				"name": "SIL_TO_GOL",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "BRZ_TO_SIV",

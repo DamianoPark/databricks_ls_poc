@@ -146,10 +146,6 @@
 									"referenceName": "DS_FRW_ADLS_ALL",
 									"type": "DatasetReference",
 									"parameters": {
-										"SRC_FS_KVS_NM": {
-											"value": "@pipeline().parameters.DL_FS_KVS_NM",
-											"type": "Expression"
-										},
 										"DLS_DR": {
 											"value": "@{item().DL_DR_NM}",
 											"type": "Expression"
@@ -170,10 +166,6 @@
 									"referenceName": "DS_FRW_ADLS_ALL",
 									"type": "DatasetReference",
 									"parameters": {
-										"SRC_FS_KVS_NM": {
-											"value": "@pipeline().parameters.DL_FS_KVS_NM",
-											"type": "Expression"
-										},
 										"DLS_DR": {
 											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}/",
 											"type": "Expression"
