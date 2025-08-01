@@ -151,7 +151,7 @@
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@{item().DL_FL_NM}",
+											"value": "@{item().source_object}.snappy.parquet",
 											"type": "Expression"
 										},
 										"DLS_URL": {
@@ -167,11 +167,11 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"DLS_DR": {
-											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}/Latest}",
+											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}}",
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@{item().DL_FL_NM}",
+											"value": "@{item().source_object}.snappy.parquet",
 											"type": "Expression"
 										},
 										"DLS_URL": {
