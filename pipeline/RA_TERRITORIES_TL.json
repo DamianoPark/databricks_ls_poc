@@ -1,0 +1,105 @@
+{
+	"name": "RA_TERRITORIES_TL",
+	"properties": {
+		"activities": [
+			{
+				"name": "GET_CFG_copy1",
+				"description": "Get migration table information from configuration table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_FRW_ASQL_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().globalParameters.GP_META_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "WORKFLOW_copy1",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "GET_CFG_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "1_WORKFLOW",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"interface_id": {
+							"value": "@variables('IF_ID')",
+							"type": "Expression"
+						},
+						"source_object_schema": {
+							"value": "@variables('source_object_schema')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"IF_ID": {
+				"type": "String",
+				"defaultValue": "IF_SRD_DPS_ERP_0071"
+			},
+			"source_object_schema": {
+				"type": "String",
+				"defaultValue": "AR"
+			},
+			"DESCRIPTION": {
+				"type": "String",
+				"defaultValue": "재무 권역 정보"
+			}
+		},
+		"folder": {
+			"name": "2ND PROJECT/1. EAI/ERP/FULL"
+		},
+		"annotations": []
+	}
+}
