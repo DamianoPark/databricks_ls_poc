@@ -147,11 +147,11 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"DLS_DR": {
-											"value": "@{pipeline().parameters.DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}-ALL/Latest",
+											"value": "@{pipeline().parameters.SRC_DL_DR_NM}/@{item().source_name}/@{item().source}/@{item().source_object}-ALL/Latest",
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@{item().source_object}.csv",
+											"value": "@{item().source_object}.tsv",
 											"type": "Expression"
 										},
 										"DLS_URL": {
