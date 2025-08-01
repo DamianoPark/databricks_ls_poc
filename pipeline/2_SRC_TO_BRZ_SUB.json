@@ -129,7 +129,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "OracleSource",
-									"oracleReaderQuery": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}\nWHERE 1=1\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE('@{item().FROM_DT}', 'YYYY-MM-DD')\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < TO_DATE('@{item().TO_DT}', 'YYYY-MM-DD')",
+									"oracleReaderQuery": {
+										"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}\nWHERE 1=1\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE('@{item().FROM_DT}', 'YYYY-MM-DD')\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < TO_DATE('@{item().TO_DT}', 'YYYY-MM-DD')",
+										"type": "Expression"
+									},
 									"partitionOption": "None",
 									"queryTimeout": "02:00:00"
 								},
@@ -149,16 +152,12 @@
 									"referenceName": "DS_FRW_ADLS_ALL",
 									"type": "DatasetReference",
 									"parameters": {
-										"SRC_FS_KVS_NM": {
-											"value": "@pipeline().parameters.DL_FS_KVS_NM",
-											"type": "Expression"
-										},
 										"DLS_DR": {
 											"value": "@{pipeline().parameters.DL_DR_NM}/@{activity('GET_CFG').output.value[0].source_name}/@{activity('GET_CFG').output.value[0].source}/@{activity('GET_CFG').output.value[0].source_object}/@{pipeline().parameters.WIND_STRT_TIME}",
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@concat(activity('GET_CFG').output.value[0].source_object,'-',replace(item().FROM_DT,'-',''),'_',replace(item().TO_DT,'-',''),'.snappy.parquet')",
+											"value": "@concat(activity('GET_CFG').output.value[0].source_object,'-',replace(item().FROM_DT,'-',''),'_',replace(item().TO_DT,'-',''),'.tsv')",
 											"type": "Expression"
 										},
 										"DLS_URL": {
@@ -351,7 +350,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "OracleSource",
-									"oracleReaderQuery": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}\nWHERE 1=1\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE('@{item().FROM_DT}', 'YYYY-MM-DD')\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < TO_DATE('@{item().TO_DT}', 'YYYY-MM-DD')",
+									"oracleReaderQuery": {
+										"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}\nWHERE 1=1\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE('@{item().FROM_DT}', 'YYYY-MM-DD')\n  AND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} < TO_DATE('@{item().TO_DT}', 'YYYY-MM-DD')",
+										"type": "Expression"
+									},
 									"partitionOption": "None",
 									"queryTimeout": "02:00:00"
 								},
@@ -371,16 +373,12 @@
 									"referenceName": "DS_FRW_ADLS_ALL",
 									"type": "DatasetReference",
 									"parameters": {
-										"SRC_FS_KVS_NM": {
-											"value": "@pipeline().parameters.DL_FS_KVS_NM",
-											"type": "Expression"
-										},
 										"DLS_DR": {
 											"value": "@{pipeline().parameters.DL_DR_NM}/@{activity('GET_CFG').output.value[0].source_name}/@{activity('GET_CFG').output.value[0].source}/@{activity('GET_CFG').output.value[0].source_object}/Latest/",
 											"type": "Expression"
 										},
 										"DLS_FN": {
-											"value": "@concat(activity('GET_CFG').output.value[0].source_object,'_',replace(item().FROM_DT,'-',''),'_',replace(item().TO_DT,'-',''),'.snappy.parquet')",
+											"value": "@concat(activity('GET_CFG').output.value[0].source_object,'_',replace(item().FROM_DT,'-',''),'_',replace(item().TO_DT,'-',''),'.tsv')",
 											"type": "Expression"
 										},
 										"DLS_URL": {
