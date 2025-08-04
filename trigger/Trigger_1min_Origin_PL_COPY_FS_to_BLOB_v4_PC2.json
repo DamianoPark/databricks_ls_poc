@@ -4,7 +4,14 @@
 		"description": "분마다 Origin_PL_COPY_FS_to_BLOB_v4_PC2 트리",
 		"annotations": [],
 		"runtimeState": "Started",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Origin_PL_COPY_FS_to_BLOB_v4_PC2",
+					"type": "PipelineReference"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
