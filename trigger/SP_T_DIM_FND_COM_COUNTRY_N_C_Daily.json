@@ -1,0 +1,24 @@
+{
+	"name": "SP_T_DIM_FND_COM_COUNTRY_N_C_Daily",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "SP_T_DIM_FND_COM_COUNTRY_N_C_Daily",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2025-08-04T07:43:00",
+				"timeZone": "Korea Standard Time"
+			}
+		}
+	}
+}

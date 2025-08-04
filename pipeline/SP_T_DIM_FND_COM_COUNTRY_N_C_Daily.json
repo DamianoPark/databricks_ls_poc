@@ -1,0 +1,50 @@
+{
+	"name": "SP_T_DIM_FND_COM_COUNTRY_N_C_Daily",
+	"properties": {
+		"activities": [
+			{
+				"name": "RA_TERRITORIES_TL",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "RA_TERRITORIES_TL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "FND_TERRITORIES_TL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "RA_TERRITORIES_TL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "FND_TERRITORIES_TL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Schedule"
+		},
+		"annotations": []
+	}
+}
