@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "FileServerLocation",
-				"folderPath": "테스트 2시험실"
+				"folderPath": "테스트"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
