@@ -7,13 +7,18 @@
 			"metadata": "Data Factory 이름",
 			"defaultValue": "databricks-ls-poc-datafactory"
 		},
+		"AzureDatabricksDeltaLake_ADF_accessToken": {
+			"type": "secureString",
+			"metadata": "'AzureDatabricksDeltaLake_ADF'의 'accessToken'에 대한 보안 문자열"
+		},
 		"ERP_ERPPROD_password": {
 			"type": "secureString",
 			"metadata": "'ERP_ERPPROD'의 'password'에 대한 보안 문자열"
 		},
-		"LS_FRW_ASQL_password": {
+		"LS_FRW_ASQL_connectionString": {
 			"type": "secureString",
-			"metadata": "'LS_FRW_ASQL'의 'password'에 대한 보안 문자열"
+			"metadata": "'LS_FRW_ASQL'의 'connectionString'에 대한 보안 문자열",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=@{linkedService().SRC_SRV_NM};Initial Catalog=@{linkedService().SRC_DB_NM};User ID=@{linkedService().SRC_USER_NM}"
 		},
 		"LS_NAS_password": {
 			"type": "secureString",
@@ -43,6 +48,10 @@
 			"type": "string",
 			"defaultValue": "@dataset().DLS_DR"
 		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-lse-datawarehouse.vault.azure.net/"
+		},
 		"ERP_ERPPROD_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "165.244.241.132:1601/ERPPROD"
@@ -50,18 +59,6 @@
 		"ERP_ERPPROD_properties_typeProperties_username": {
 			"type": "string",
 			"defaultValue": "LSISDATALAKE"
-		},
-		"LS_FRW_ASQL_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": "@{linkedService().SRC_SRV_NM}"
-		},
-		"LS_FRW_ASQL_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "@{linkedService().SRC_DB_NM}"
-		},
-		"LS_FRW_ASQL_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "sqladmin"
 		},
 		"LS_NAS_properties_typeProperties_host": {
 			"type": "string",
@@ -115,18 +112,6 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/6964c315-93f4-43ed-9c55-ab9ff3d37dc3/resourcegroups/DataPlatform/providers/Microsoft.DataFactory/factories/ls-dp-adf/integrationruntimes/ls-dp-adf-ir-new"
 		},
-		"DS_FRW_ADLS_ALL1_properties_typeProperties_fileName": {
-			"type": "string",
-			"defaultValue": "@dataset().DLS_FN"
-		},
-		"DS_FRW_ADLS_ALL1_properties_typeProperties_folderPath": {
-			"type": "string",
-			"defaultValue": "@dataset().DLS_DR"
-		},
-		"AzureKeyVault1_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://kv-lse-datawarehouse.vault.azure.net/"
-		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "스토리지 계정 연결 된 ARM 서식 파일을 포함 하는 URI입니다."
@@ -154,14 +139,20 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"AzureDatabricksDeltaLake_ADF_accessToken": {
+						"value": "[parameters('AzureDatabricksDeltaLake_ADF_accessToken')]"
+					},
+					"databrickslspocsa_accountKey": {
+						"value": "[parameters('databrickslspocsa_accountKey')]"
+					},
 					"syndpdatawarehouse_password": {
 						"value": "[parameters('syndpdatawarehouse_password')]"
 					},
 					"ERP_ERPPROD_password": {
 						"value": "[parameters('ERP_ERPPROD_password')]"
 					},
-					"LS_FRW_ASQL_password": {
-						"value": "[parameters('LS_FRW_ASQL_password')]"
+					"LS_FRW_ASQL_connectionString": {
+						"value": "[parameters('LS_FRW_ASQL_connectionString')]"
 					},
 					"LS_NAS_password": {
 						"value": "[parameters('LS_NAS_password')]"
@@ -172,8 +163,11 @@
 					"RMS_wcadmin_password": {
 						"value": "[parameters('RMS_wcadmin_password')]"
 					},
-					"databrickslspocsa_accountKey": {
-						"value": "[parameters('databrickslspocsa_accountKey')]"
+					"AzureKeyVault1_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+					},
+					"databrickslspocsa_properties_typeProperties_url": {
+						"value": "[parameters('databrickslspocsa_properties_typeProperties_url')]"
 					},
 					"syndpdatawarehouse_properties_typeProperties_server": {
 						"value": "[parameters('syndpdatawarehouse_properties_typeProperties_server')]"
@@ -187,23 +181,17 @@
 					"ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId": {
 						"value": "[parameters('ls-dp-adf-ir-new_properties_typeProperties_linkedInfo_resourceId')]"
 					},
-					"AzureKeyVault1_properties_typeProperties_baseUrl": {
-						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+					"DS_FRW_ADLS_ALL_properties_typeProperties_fileName": {
+						"value": "[parameters('DS_FRW_ADLS_ALL_properties_typeProperties_fileName')]"
+					},
+					"DS_FRW_ADLS_ALL_properties_typeProperties_folderPath": {
+						"value": "[parameters('DS_FRW_ADLS_ALL_properties_typeProperties_folderPath')]"
 					},
 					"ERP_ERPPROD_properties_typeProperties_server": {
 						"value": "[parameters('ERP_ERPPROD_properties_typeProperties_server')]"
 					},
 					"ERP_ERPPROD_properties_typeProperties_username": {
 						"value": "[parameters('ERP_ERPPROD_properties_typeProperties_username')]"
-					},
-					"LS_FRW_ASQL_properties_typeProperties_server": {
-						"value": "[parameters('LS_FRW_ASQL_properties_typeProperties_server')]"
-					},
-					"LS_FRW_ASQL_properties_typeProperties_database": {
-						"value": "[parameters('LS_FRW_ASQL_properties_typeProperties_database')]"
-					},
-					"LS_FRW_ASQL_properties_typeProperties_userName": {
-						"value": "[parameters('LS_FRW_ASQL_properties_typeProperties_userName')]"
 					},
 					"LS_NAS_properties_typeProperties_host": {
 						"value": "[parameters('LS_NAS_properties_typeProperties_host')]"
@@ -228,15 +216,6 @@
 					},
 					"RMS_wcadmin_properties_typeProperties_userName": {
 						"value": "[parameters('RMS_wcadmin_properties_typeProperties_userName')]"
-					},
-					"databrickslspocsa_properties_typeProperties_url": {
-						"value": "[parameters('databrickslspocsa_properties_typeProperties_url')]"
-					},
-					"DS_FRW_ADLS_ALL_properties_typeProperties_fileName": {
-						"value": "[parameters('DS_FRW_ADLS_ALL_properties_typeProperties_fileName')]"
-					},
-					"DS_FRW_ADLS_ALL_properties_typeProperties_folderPath": {
-						"value": "[parameters('DS_FRW_ADLS_ALL_properties_typeProperties_folderPath')]"
 					}
 				}
 			},
@@ -255,77 +234,11 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"DS_FRW_ADLS_ALL1_properties_typeProperties_fileName": {
-						"value": "[parameters('DS_FRW_ADLS_ALL1_properties_typeProperties_fileName')]"
-					},
-					"DS_FRW_ADLS_ALL1_properties_typeProperties_folderPath": {
-						"value": "[parameters('DS_FRW_ADLS_ALL1_properties_typeProperties_folderPath')]"
 					}
 				}
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'databricks-ls-poc-datafactory_ArmTemplate_0')]"
-			]
-		},
-		{
-			"name": "databricks-ls-poc-datafactory_ArmTemplate_2",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2024-03-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'databricks-ls-poc-datafactory_ArmTemplate_1')]"
-			]
-		},
-		{
-			"name": "databricks-ls-poc-datafactory_ArmTemplate_3",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2024-03-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'databricks-ls-poc-datafactory_ArmTemplate_2')]"
-			]
-		},
-		{
-			"name": "databricks-ls-poc-datafactory_ArmTemplate_4",
-			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2024-03-01",
-			"properties": {
-				"mode": "incremental",
-				"templateLink": {
-					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
-					"contentVersion": "1.0.0.0"
-				},
-				"parameters": {
-					"factoryName": {
-						"value": "[parameters('factoryName')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[resourceId('Microsoft.Resources/deployments', 'databricks-ls-poc-datafactory_ArmTemplate_3')]"
 			]
 		}
 	]
