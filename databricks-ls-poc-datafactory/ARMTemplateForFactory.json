@@ -4612,6 +4612,67 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SP_T_DIM_FND_COM_COUNTRY_N_C_Daily')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "RA_TERRITORIES_TL",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "RA_TERRITORIES_TL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "FND_TERRITORIES_TL",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "RA_TERRITORIES_TL",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "FND_TERRITORIES_TL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Schedule"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/RA_TERRITORIES_TL')]",
+				"[concat(variables('factoryId'), '/pipelines/FND_TERRITORIES_TL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_BLOB_input_PC2')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -5240,6 +5301,36 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SP_T_DIM_FND_COM_COUNTRY_N_C_Daily')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SP_T_DIM_FND_COM_COUNTRY_N_C_Daily",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2025-08-04T07:43:00",
+						"timeZone": "Korea Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SP_T_DIM_FND_COM_COUNTRY_N_C_Daily')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Trigger_1min_Origin_PL_COPY_FS_to_BLOB_v4_PC2')]",
