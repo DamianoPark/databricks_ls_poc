@@ -143,35 +143,16 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}\nWHERE '@{split(activity('GET_CFG').output.value[0].target_field,',')[0]}' >= '@{pipeline().parameters.source_object_schema}.@{pipeline().parameters.FROM}'\nAND\n'@{split(activity('GET_CFG').output.value[0].target_field,',')[1]}' >= '@{pipeline().parameters.source_object_schema}.@{pipeline().parameters.TO}'",
+							"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}\nWHERE '@{split(activity('GET_CFG').output.value[0].target_field,',')[0]}' >= '@{pipeline().parameters.source_object_schema}.@{pipeline().parameters.FROM}'\nAND\n'@{split(activity('GET_CFG').output.value[0].target_field,',')[1]}' <= '@{pipeline().parameters.source_object_schema}.@{pipeline().parameters.TO}'",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
 					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": {
-								"value": "@{pipeline().parameters.source_object}.tsv",
-								"type": "Expression"
-							}
-						}
+						"type": "AzureBlobFSSink"
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
@@ -181,8 +162,19 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "copytoadls",
-						"type": "DatasetReference"
+						"referenceName": "DS_FRW_ADLS_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"DLS_DR": {
+								"value": "@{pipeline().parameters.DL_DR_NM}/@{pipeline().parameters.source_object_schema}/@{pipeline().parameters.source_object}",
+								"type": "Expression"
+							},
+							"DLS_FN": {
+								"value": "@{pipeline().parameters.source_object}.tsv",
+								"type": "Expression"
+							},
+							"DLS_URL": "@pipeline().parameters.DLS_URL"
+						}
 					}
 				]
 			},
@@ -363,15 +355,15 @@
 			},
 			"DLS_URL": {
 				"type": "string",
-				"defaultValue": "https://lsdpadls.dfs.core.windows.net/"
+				"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
 			},
 			"DL_FS_NM": {
 				"type": "string",
-				"defaultValue": "lsdpadls"
+				"defaultValue": "databrickslspocsa"
 			},
 			"DL_DR_NM": {
 				"type": "string",
-				"defaultValue": "bronze"
+				"defaultValue": "gold"
 			},
 			"DL_FS_KVS_NM": {
 				"type": "string",
