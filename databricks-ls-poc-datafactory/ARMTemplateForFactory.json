@@ -3162,6 +3162,425 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/COPY_TO_SYNAPSE')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GET_CFG",
+						"description": "Get migration table information from configuration table",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [load_id]\n      ,[source_name]\n      ,[source]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [r_mig_flg] = 1\n  AND [interface_id] = '@{pipeline().parameters.IF_ID}'\n",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_FRW_ASQL_ALL1",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().parameters.META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().parameters.META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().parameters.META_DB_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().parameters.META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "GET_DATE_RANGE",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "GET_CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "SELECT \n    MIN('@{pipeline().parameters.FROM}') AS MIN_DT,\n    MAX('@{pipeline().parameters.TO}') AS MAX_DT\nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ERP_Oracle",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "GET_SRC_REC_CNT",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "GET_DATE_RANGE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "SELECT COUNT(*) AS src_rec_cnt\nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "ERP_Oracle",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "COPY_TO_SYNAPSE",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "GET_SRC_REC_CNT",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "OracleSource",
+								"oracleReaderQuery": {
+									"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}\nWHERE @{pipeline().parameters.source_object}.@{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE(@{pipeline().parameters.FROM})\nAND\n@{pipeline().parameters.source_object}.@{split(activity('GET_CFG').output.value[0].target_field,',')[1]} <= TO_DATE(@{pipeline().parameters.TO})\n",
+									"type": "Expression"
+								},
+								"partitionOption": "None",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "AzureBlobFSSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "ERP_Oracle",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_FRW_ADLS_ALL",
+								"type": "DatasetReference",
+								"parameters": {
+									"DLS_DR": {
+										"value": "@{pipeline().parameters.DL_DR_NM}/@{pipeline().parameters.source_object_schema}/@{pipeline().parameters.source_object}",
+										"type": "Expression"
+									},
+									"DLS_FN": {
+										"value": "@{pipeline().parameters.source_object}.tsv",
+										"type": "Expression"
+									},
+									"DLS_URL": "@pipeline().parameters.DLS_URL"
+								}
+							}
+						]
+					},
+					{
+						"name": "LOG",
+						"type": "IfCondition",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "COPY_TO_SYNAPSE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('COPY_TO_SYNAPSE').output.executionDetails[0].status,'Succeeded')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "FAIL",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[SP_ETL_DATA_INSERT_LOG]",
+										"storedProcedureParameters": {
+											"err_mesg": {
+												"value": {
+													"value": "@activity('COPY_TO_SYNAPSE').output.errors[0].Message",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"load_cnt": {
+												"value": {
+													"value": "@activity('COPY_TO_SYNAPSE').output.rowsRead",
+													"type": "Expression"
+												},
+												"type": "Decimal"
+											},
+											"parm_from": {
+												"value": null,
+												"type": "String"
+											},
+											"parm_to": {
+												"value": null,
+												"type": "String"
+											},
+											"pgm_status": {
+												"value": "E",
+												"type": "String"
+											},
+											"run_pgm": {
+												"value": {
+													"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.value[0].synapse_object_schema,'.',activity('GET_CFG').output.value[0].synapse_object)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"st_date": {
+												"value": {
+													"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											},
+											"tgt_job_area": {
+												"value": "ODS",
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "syndpdatawarehouse",
+										"type": "LinkedServiceReference"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "SUCCESS",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[SP_ETL_DATA_INSERT_LOG]",
+										"storedProcedureParameters": {
+											"err_mesg": {
+												"value": null,
+												"type": "String"
+											},
+											"load_cnt": {
+												"value": {
+													"value": "@activity('COPY_TO_SYNAPSE').output.rowsCopied",
+													"type": "Expression"
+												},
+												"type": "Decimal"
+											},
+											"parm_from": {
+												"value": null,
+												"type": "String"
+											},
+											"parm_to": {
+												"value": null,
+												"type": "String"
+											},
+											"pgm_status": {
+												"value": "S",
+												"type": "String"
+											},
+											"run_pgm": {
+												"value": {
+													"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.value[0].synapse_object_schema,'.',activity('GET_CFG').output.value[0].synapse_object)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"st_date": {
+												"value": {
+													"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.value[0].yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
+													"type": "Expression"
+												},
+												"type": "DateTime"
+											},
+											"tgt_job_area": {
+												"value": "ODS",
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "syndpdatawarehouse",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"IF_ID": {
+						"type": "string"
+					},
+					"META_DB_SRV_NM": {
+						"type": "string",
+						"defaultValue": "ls-dp-sql.database.windows.net"
+					},
+					"META_DB_NM": {
+						"type": "string",
+						"defaultValue": "sqldb-dataportal"
+					},
+					"META_DB_USER_NM": {
+						"type": "string",
+						"defaultValue": "lseadmin"
+					},
+					"META_DB_KVS_NM": {
+						"type": "string",
+						"defaultValue": "KVS-FRW-META-ASQL"
+					},
+					"DLS_URL": {
+						"type": "string",
+						"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
+					},
+					"DL_FS_NM": {
+						"type": "string",
+						"defaultValue": "databrickslspocsa"
+					},
+					"DL_DR_NM": {
+						"type": "string",
+						"defaultValue": "gold"
+					},
+					"DL_FS_KVS_NM": {
+						"type": "string",
+						"defaultValue": "KVS-FRW-FS-ADLS"
+					},
+					"SRC_DB_SRV_NM": {
+						"type": "string",
+						"defaultValue": "ls-dp-sql.database.windows.net"
+					},
+					"SP_INS_PIP_INFO": {
+						"type": "string",
+						"defaultValue": "Meta.SP_INS_RAW_PIP_INFO"
+					},
+					"SP_FAIL_ACT": {
+						"type": "string",
+						"defaultValue": "Meta.SP_FAIL_ACT"
+					},
+					"source_object_schema": {
+						"type": "string",
+						"defaultValue": "ECST"
+					},
+					"source_object": {
+						"type": "string",
+						"defaultValue": "ECST_SALES_DETAILS"
+					},
+					"FROM": {
+						"type": "string"
+					},
+					"TO": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/3. FRAMEWORK/BRIDGE TO SYNAPSE"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-12-20T01:08:34Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_FRW_ASQL_ALL1')]",
+				"[concat(variables('factoryId'), '/datasets/ERP_Oracle')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FRW_ADLS_ALL')]",
+				"[concat(variables('factoryId'), '/linkedServices/syndpdatawarehouse')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/EAI_COMPLETED')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -3274,6 +3693,145 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_FRW_ASQL_ALL')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ERP_ECST_SALES_DETAILS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GET_CFG",
+						"description": "Get migration table information from configuration table",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyy-MM') as 'yyyyMM'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_FRW_ASQL_ALL1",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().globalParameters.GP_META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "SYNAPSE",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "GET_CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "COPY_TO_SYNAPSE",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"IF_ID": {
+									"value": "@variables('IF_ID')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"DESCRIPTION": {
+						"type": "String",
+						"defaultValue": "View Revenue & COGS"
+					},
+					"BODY": {
+						"type": "String",
+						"defaultValue": "-------- BODY --------"
+					},
+					"IF_ID": {
+						"type": "String",
+						"defaultValue": "IF_SRD_DPS_ERP_0006"
+					},
+					"IF_REQ_DATA": {
+						"type": "String",
+						"defaultValue": "-------- PARAM --------"
+					},
+					"FROM_COLUMN": {
+						"type": "String",
+						"defaultValue": "FROM_YYYYMM"
+					},
+					"TO_COLUMN": {
+						"type": "String",
+						"defaultValue": "TO_YYYYMM"
+					},
+					"source_object_schema": {
+						"type": "String",
+						"defaultValue": "ECST"
+					},
+					"source_object": {
+						"type": "String",
+						"defaultValue": "ECST_SALES_DETAILS"
+					},
+					"FROM": {
+						"type": "String",
+						"defaultValue": "202501"
+					},
+					"TO": {
+						"type": "String",
+						"defaultValue": "202508"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/1. EAI/ERP/INCREMENTAL/yyyy-MM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-07-20T01:40:07Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_FRW_ASQL_ALL1')]",
+				"[concat(variables('factoryId'), '/pipelines/COPY_TO_SYNAPSE')]"
 			]
 		},
 		{
@@ -4971,6 +5529,59 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ASQL_ALL1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FRW_ASQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SRC_SRV_NM": {
+							"value": "@dataset().SRC_SRV_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_NM": {
+							"value": "@dataset().SRC_DB_NM",
+							"type": "Expression"
+						},
+						"SRC_USER_NM": {
+							"value": "@dataset().SRC_USER_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_KVS_NM": {
+							"value": "@dataset().SRC_DB_KVS_NM",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "FRW_META_DS"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FRW_ASQL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_SRC_NAS_FS2')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -5078,12 +5689,39 @@
 				"type": "OracleTable",
 				"schema": [],
 				"typeProperties": {
-					"schema": "APPLSYS",
-					"table": "FND_TERRITORIES_TL"
+					"schema": "ECST",
+					"table": "ECST_SALES_DETAILS"
 				}
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ERP_ERPPROD')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copytoadls')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "databrickslspocsa",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "copy-to-synapse"
+					},
+					"columnDelimiter": "\t",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
 			]
 		},
 		{
@@ -5324,8 +5962,7 @@
 						"frequency": "Day",
 						"interval": 1,
 						"startTime": "2025-08-03T01:00:00",
-						"timeZone": "Korea Standard Time",
-						"schedule": {}
+						"timeZone": "Korea Standard Time"
 					}
 				}
 			},
