@@ -3131,8 +3131,9 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2025-08-04T07:43:00",
-						"timeZone": "Korea Standard Time"
+						"startTime": "2025-08-03T01:00:00",
+						"timeZone": "Korea Standard Time",
+						"schedule": {}
 					}
 				}
 			},
