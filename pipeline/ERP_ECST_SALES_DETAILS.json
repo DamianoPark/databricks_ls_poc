@@ -74,6 +74,14 @@
 						"IF_ID": {
 							"value": "@variables('IF_ID')",
 							"type": "Expression"
+						},
+						"FROM": {
+							"value": "@variables('FROM')",
+							"type": "Expression"
+						},
+						"TO": {
+							"value": "@variables('TO')",
+							"type": "Expression"
 						}
 					}
 				}
