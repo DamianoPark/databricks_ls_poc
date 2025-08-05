@@ -108,6 +108,150 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "LOG",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "UPSERT",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('UPSERT').output.executionDetails[1].status,'Succeeded')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "FAIL",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[SP_ETL_DATA_INSERT_LOG]",
+								"storedProcedureParameters": {
+									"err_mesg": {
+										"value": {
+											"value": "@activity('UPSERT').output.errors[0].Message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"load_cnt": {
+										"value": {
+											"value": "@activity('UPSERT').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Decimal"
+									},
+									"parm_from": {
+										"value": null,
+										"type": "String"
+									},
+									"parm_to": {
+										"value": null,
+										"type": "String"
+									},
+									"pgm_status": {
+										"value": "E",
+										"type": "String"
+									},
+									"run_pgm": {
+										"value": {
+											"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.firstRow.synapse_object_schema,'.',activity('GET_CFG').output.firstRow.synapse_object)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"st_date": {
+										"value": {
+											"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"tgt_job_area": {
+										"value": "ODS",
+										"type": "String"
+									}
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "SUCCESS",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[SP_ETL_DATA_INSERT_LOG]",
+								"storedProcedureParameters": {
+									"err_mesg": {
+										"value": null,
+										"type": "String"
+									},
+									"load_cnt": {
+										"value": {
+											"value": "@activity('UPSERT').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Decimal"
+									},
+									"parm_from": {
+										"value": null,
+										"type": "String"
+									},
+									"parm_to": {
+										"value": null,
+										"type": "String"
+									},
+									"pgm_status": {
+										"value": "S",
+										"type": "String"
+									},
+									"run_pgm": {
+										"value": {
+											"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.firstRow.synapse_object_schema,'.',activity('GET_CFG').output.firstRow.synapse_object)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"st_date": {
+										"value": {
+											"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"tgt_job_area": {
+										"value": "ODS",
+										"type": "String"
+									}
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
