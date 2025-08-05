@@ -109,6 +109,10 @@
 			},
 			"TO": {
 				"type": "String"
+			},
+			"source_object_schema": {
+				"type": "String",
+				"defaultValue": "ㄸ"
 			}
 		},
 		"folder": {
