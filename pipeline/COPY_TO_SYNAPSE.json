@@ -143,7 +143,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}\nWHERE @{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE('@{pipeline().parameters.FROM}', 'YYYYMM')\nAND @{split(activity('GET_CFG').output.value[0].target_field,',')[1]} <= TO_DATE('@{pipeline().parameters.TO}', 'YYYYMM')",
+							"value": "@concat(\n  'SELECT * FROM ',\n  pipeline().parameters.source_object_schema,\n  '.',\n  pipeline().parameters.source_object,\n  ' WHERE ',\n  split(activity('GET_CFG').output.value[0].target_field, ',')[0],\n  ' >= TO_DATE(''',\n  pipeline().parameters.FROM,\n  ''', ''YYYYMM'') AND ',\n  split(activity('GET_CFG').output.value[0].target_field, ',')[1],\n  ' <= TO_DATE(''',\n  pipeline().parameters.TO,\n  ''', ''YYYYMM'')'\n)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
