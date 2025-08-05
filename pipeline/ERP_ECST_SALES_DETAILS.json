@@ -114,7 +114,7 @@
 			},
 			"FROM": {
 				"type": "String",
-				"defaultValue": "202507"
+				"defaultValue": "202501"
 			},
 			"TO": {
 				"type": "String",
