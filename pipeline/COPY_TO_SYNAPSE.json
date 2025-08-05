@@ -72,7 +72,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "SELECT \n    MIN('@{split(activity('GET_CFG').output.value[0].target_field, ',')[0]}') AS MIN_DT,\n    MAX('@{split(activity('GET_CFG').output.value[0].target_field, ',')[1]}') AS MAX_DT\nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}",
+							"value": "SELECT \n    MIN('@{pipeline().parameters.FROM}') AS MIN_DT,\n    MAX('@{pipeline().parameters.TO}') AS MAX_DT\nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -396,6 +396,12 @@
 			"source_object": {
 				"type": "string",
 				"defaultValue": "ECST_SALES_DETAILS"
+			},
+			"FROM": {
+				"type": "string"
+			},
+			"TO": {
+				"type": "string"
 			}
 		},
 		"folder": {
