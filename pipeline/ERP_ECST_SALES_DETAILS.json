@@ -98,17 +98,11 @@
 			},
 			"FROM_COLUMN": {
 				"type": "String",
-				"defaultValue": "FROM_202505"
+				"defaultValue": "FROM_YYYYMM"
 			},
 			"TO_COLUMN": {
 				"type": "String",
-				"defaultValue": "TO_202508"
-			},
-			"FROM": {
-				"type": "String"
-			},
-			"TO": {
-				"type": "String"
+				"defaultValue": "TO_YYYYMM"
 			},
 			"source_object_schema": {
 				"type": "String",
@@ -117,6 +111,14 @@
 			"source_object": {
 				"type": "String",
 				"defaultValue": "ECST_SALES_DETAILS"
+			},
+			"FROM": {
+				"type": "String",
+				"defaultValue": "202507"
+			},
+			"TO": {
+				"type": "String",
+				"defaultValue": "202508"
 			}
 		},
 		"folder": {
