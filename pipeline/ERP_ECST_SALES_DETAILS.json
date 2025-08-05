@@ -1,0 +1,120 @@
+{
+	"name": "ERP_ECST_SALES_DETAILS",
+	"properties": {
+		"activities": [
+			{
+				"name": "GET_CFG",
+				"description": "Get migration table information from configuration table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT [load_id]\n      ,[source_name]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyy-MM') as 'yyyyMM'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+							"type": "Expression"
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_FRW_ASQL_ALL1",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().globalParameters.GP_META_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "SYNAPSE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "GET_CFG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "COPY_TO_SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"IF_ID": {
+							"value": "@variables('IF_ID')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"DESCRIPTION": {
+				"type": "String",
+				"defaultValue": "View Revenue & COGS"
+			},
+			"BODY": {
+				"type": "String",
+				"defaultValue": "-------- BODY --------"
+			},
+			"IF_ID": {
+				"type": "String",
+				"defaultValue": "IF_SRD_DPS_ERP_0006"
+			},
+			"IF_REQ_DATA": {
+				"type": "String",
+				"defaultValue": "-------- PARAM --------"
+			},
+			"FROM_COLUMN": {
+				"type": "String",
+				"defaultValue": "FROM_YYYYMM"
+			},
+			"TO_COLUMN": {
+				"type": "String",
+				"defaultValue": "TO_YYYYMM"
+			},
+			"FROM": {
+				"type": "String"
+			},
+			"TO": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "2ND PROJECT/1. EAI/ERP/INCREMENTAL/yyyy-MM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-20T01:40:07Z"
+	}
+}
