@@ -72,7 +72,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "SELECT \n    MIN('@{split(activity('GET_CFG').output.value[0].target_field, ',')[0]}') AS MIN_DT,\n    MAX('@{split(activity('GET_CFG').output.value[0].target_field, ',')[1]}') AS MAX_DT\nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+							"value": "SELECT \n    MIN('@{split(activity('GET_CFG').output.value[0].target_field, ',')[0]}') AS MIN_DT,\n    MAX('@{split(activity('GET_CFG').output.value[0].target_field, ',')[1]}') AS MAX_DT\nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -108,7 +108,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "SELECT COUNT(*) AS src_rec_cnt\nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+							"value": "SELECT COUNT(*) AS src_rec_cnt\nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -143,7 +143,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+							"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -389,6 +389,10 @@
 			"source_object_schema": {
 				"type": "string",
 				"defaultValue": "ECST"
+			},
+			"source_object": {
+				"type": "string",
+				"defaultValue": "ECST_SALES_DETAILS"
 			}
 		},
 		"folder": {
