@@ -72,7 +72,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "SELECT \n    MIN('@{split(activity('GET_CFG').output.value[0].target_field, ',')[0]}') AS MIN_DT,\n    MAX('@{split(activity('GET_CFG').output.value[0].target_field, ',')[1]}') AS MAX_DT\nFROM @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+							"value": "SELECT \n    MIN('@{split(activity('GET_CFG').output.value[0].target_field, ',')[0]}') AS MIN_DT,\n    MAX('@{split(activity('GET_CFG').output.value[0].target_field, ',')[1]}') AS MAX_DT\nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -107,7 +107,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "SELECT COUNT(*) AS src_rec_cnt\nFROM @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+						"oracleReaderQuery": {
+							"value": "SELECT COUNT(*) AS src_rec_cnt\nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+							"type": "Expression"
+						},
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -139,7 +142,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "SELECT * \nFROM @{activity('GET_CFG').output.value[0].source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+						"oracleReaderQuery": {
+							"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{activity('GET_CFG').output.value[0].source_object}",
+							"type": "Expression"
+						},
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -379,6 +385,10 @@
 			"SP_FAIL_ACT": {
 				"type": "string",
 				"defaultValue": "Meta.SP_FAIL_ACT"
+			},
+			"source_object_schema": {
+				"type": "string",
+				"defaultValue": "ECST"
 			}
 		},
 		"folder": {
