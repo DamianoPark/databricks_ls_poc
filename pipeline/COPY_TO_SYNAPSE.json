@@ -157,7 +157,10 @@
 						"formatSettings": {
 							"type": "DelimitedTextWriteSettings",
 							"quoteAllText": true,
-							"fileExtension": ".tsv"
+							"fileExtension": {
+								"value": "@{pipeline().parameters.source_object}.tsv",
+								"type": "Expression"
+							}
 						}
 					},
 					"enableStaging": false,
