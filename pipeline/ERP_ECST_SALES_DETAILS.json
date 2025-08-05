@@ -121,12 +121,12 @@
 				"defaultValue": "ECST_SALES_DETAILS"
 			},
 			"FROM": {
-				"type": "String",
-				"defaultValue": "202501"
+				"type": "Integer",
+				"defaultValue": 202501
 			},
 			"TO": {
-				"type": "String",
-				"defaultValue": "202508"
+				"type": "Integer",
+				"defaultValue": 202508
 			}
 		},
 		"folder": {
