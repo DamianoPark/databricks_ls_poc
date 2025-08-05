@@ -98,11 +98,11 @@
 			},
 			"FROM_COLUMN": {
 				"type": "String",
-				"defaultValue": "FROM_YYYYMM"
+				"defaultValue": "FROM_202505"
 			},
 			"TO_COLUMN": {
 				"type": "String",
-				"defaultValue": "TO_YYYYMM"
+				"defaultValue": "TO_202508"
 			},
 			"FROM": {
 				"type": "String"
@@ -112,7 +112,7 @@
 			},
 			"source_object_schema": {
 				"type": "String",
-				"defaultValue": "ㄸ"
+				"defaultValue": "ECST"
 			},
 			"source_object": {
 				"type": "String",
