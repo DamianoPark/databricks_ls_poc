@@ -372,22 +372,6 @@
 				"type": "string",
 				"defaultValue": "ls-dp-sql.database.windows.net"
 			},
-			"SRC_DB_NM": {
-				"type": "string",
-				"defaultValue": "sqldb-bridge"
-			},
-			"SRC_NM": {
-				"type": "string",
-				"defaultValue": "ERP-BRIDGE"
-			},
-			"SRC_DB_USR_NM": {
-				"type": "string",
-				"defaultValue": "lseadmin"
-			},
-			"SRC_DB_KVS_NM": {
-				"type": "string",
-				"defaultValue": "KVS-FRW-BRIDGE-ASQL"
-			},
 			"SP_INS_PIP_INFO": {
 				"type": "string",
 				"defaultValue": "Meta.SP_INS_RAW_PIP_INFO"
@@ -395,22 +379,6 @@
 			"SP_FAIL_ACT": {
 				"type": "string",
 				"defaultValue": "Meta.SP_FAIL_ACT"
-			},
-			"LK_SRC_SRV_NM": {
-				"type": "string",
-				"defaultValue": "synw-datawarehouse-prod-001.sql.azuresynapse.net"
-			},
-			"LK_SRC_DB_NM": {
-				"type": "string",
-				"defaultValue": "syndpdatawarehouse"
-			},
-			"LK_SRC_USER_NM": {
-				"type": "string",
-				"defaultValue": "sqladminuser"
-			},
-			"LK_SRC_DB_KVS_NM": {
-				"type": "string",
-				"defaultValue": "PROD-KVS-FRW-ADW-SYN"
 			}
 		},
 		"folder": {
