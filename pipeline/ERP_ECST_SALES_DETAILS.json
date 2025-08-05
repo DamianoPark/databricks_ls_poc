@@ -113,6 +113,10 @@
 			"source_object_schema": {
 				"type": "String",
 				"defaultValue": "ㄸ"
+			},
+			"source_object": {
+				"type": "String",
+				"defaultValue": "ECST_SALES_DETAILS"
 			}
 		},
 		"folder": {
