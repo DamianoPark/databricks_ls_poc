@@ -1,0 +1,45 @@
+{
+	"name": "DS_FRW_ASQL_TBL",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_FRW_ASQL",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"SRC_SRV_NM": "@dataset().SRC_SRV_NM",
+				"SRC_DB_NM": {
+					"value": "@dataset().SRC_DB_NM",
+					"type": "Expression"
+				},
+				"SRC_USER_NM": "@dataset().SRC_SRV_NM",
+				"SRC_DB_KVS_NM": "@dataset().SRC_SRV_NM"
+			}
+		},
+		"parameters": {
+			"SRC_SRV_NM": {
+				"type": "string"
+			},
+			"SRC_DB_NM": {
+				"type": "string"
+			},
+			"SRC_USER_NM": {
+				"type": "string"
+			},
+			"SRC_DB_KVS_NM": {
+				"type": "string"
+			},
+			"SCHEMA_NM": {
+				"type": "string"
+			},
+			"TBL_NM": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "@dataset().SCHEMA_NM",
+			"table": "@dataset().TBL_NM"
+		}
+	}
+}

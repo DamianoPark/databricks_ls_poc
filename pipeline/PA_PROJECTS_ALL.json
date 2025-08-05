@@ -48,12 +48,85 @@
 					},
 					"firstRowOnly": true
 				}
+			},
+			{
+				"name": "UPSERT",
+				"description": "COPY_TO_ADLS_LOG",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "GET_CFG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureBlobFSSink"
+					},
+					"enableStaging": true
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_FRW_ASQL_TBL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+							"SRC_DB_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+							"SRC_USER_NM": "@pipeline().globalParameters.GP_META_USER_NM",
+							"SRC_DB_KVS_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+							"SCHEMA_NM": "@{activity('GET_CFG').output.firstRow.source_object_schema}",
+							"TBL_NM": "@{activity('GET_CFG').output.firstRow.source_object}"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_FRW_ADLS_ALL",
+						"type": "DatasetReference",
+						"parameters": {
+							"DLS_DR": "@{pipeline().parameters.DL_DR_NM}/@{activity('GET_CFG').output.firstRow.source_name}/@{activity('GET_CFG').output.firstRow.source}/@{activity('GET_CFG').output.firstRow.source_object}-ALL/@{variables('TIME')}",
+							"DLS_FN": {
+								"value": "@{activity('GET_CFG').output.firstRow.source_object}.tsv",
+								"type": "Expression"
+							},
+							"DLS_URL": "@pipeline().parameters.DLS_URL"
+						}
+					}
+				]
 			}
 		],
+		"parameters": {
+			"DL_DR_NM": {
+				"type": "string",
+				"defaultValue": "bronze"
+			},
+			"DLS_URL": {
+				"type": "string",
+				"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
+			}
+		},
 		"variables": {
 			"IF_ID": {
 				"type": "String",
 				"defaultValue": "IF_SRD_DPS_ERP_0010"
+			},
+			"TIME": {
+				"type": "String"
 			}
 		},
 		"folder": {
