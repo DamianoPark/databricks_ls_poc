@@ -50,8 +50,7 @@
 				}
 			},
 			{
-				"name": "UPSERT",
-				"description": "COPY_TO_ADLS_LOG",
+				"name": "COPY_TO_ADLS",
 				"type": "Copy",
 				"dependsOn": [
 					{
@@ -85,12 +84,30 @@
 						"referenceName": "DS_FRW_ASQL_TBL",
 						"type": "DatasetReference",
 						"parameters": {
-							"SRC_SRV_NM": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
-							"SRC_DB_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
-							"SRC_USER_NM": "@pipeline().globalParameters.GP_META_USER_NM",
-							"SRC_DB_KVS_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
-							"SCHEMA_NM": "@{activity('GET_CFG').output.firstRow.source_object_schema}",
-							"TBL_NM": "@{activity('GET_CFG').output.firstRow.source_object}"
+							"SRC_SRV_NM": {
+								"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_NM": {
+								"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+								"type": "Expression"
+							},
+							"SRC_USER_NM": {
+								"value": "@pipeline().globalParameters.GP_META_USER_NM",
+								"type": "Expression"
+							},
+							"SRC_DB_KVS_NM": {
+								"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+								"type": "Expression"
+							},
+							"SCHEMA_NM": {
+								"value": "@{activity('GET_CFG').output.firstRow.source_object_schema}",
+								"type": "Expression"
+							},
+							"TBL_NM": {
+								"value": "@{activity('GET_CFG').output.firstRow.source_object}",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -99,7 +116,10 @@
 						"referenceName": "DS_FRW_ADLS_ALL",
 						"type": "DatasetReference",
 						"parameters": {
-							"DLS_DR": "@{pipeline().parameters.DL_DR_NM}/@{activity('GET_CFG').output.firstRow.source_name}/@{activity('GET_CFG').output.firstRow.source}/@{activity('GET_CFG').output.firstRow.source_object}-ALL/@{variables('TIME')}",
+							"DLS_DR": {
+								"value": "@{pipeline().parameters.DL_DR_NM}/@{activity('GET_CFG').output.firstRow.source_name}/@{activity('GET_CFG').output.firstRow.source}/@{activity('GET_CFG').output.firstRow.source_object}-ALL/@{variables('TIME')}",
+								"type": "Expression"
+							},
 							"DLS_FN": {
 								"value": "@{activity('GET_CFG').output.firstRow.source_object}.tsv",
 								"type": "Expression"
@@ -110,147 +130,52 @@
 				]
 			},
 			{
-				"name": "LOG",
-				"type": "IfCondition",
+				"name": "UPSERT_and_LOG",
+				"type": "DatabricksNotebook",
 				"dependsOn": [
 					{
-						"activity": "UPSERT",
+						"activity": "COPY_TO_ADLS",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"expression": {
-						"value": "@equals(activity('UPSERT').output.executionDetails[1].status,'Succeeded')",
-						"type": "Expression"
-					},
-					"ifFalseActivities": [
-						{
-							"name": "FAIL",
-							"type": "SqlServerStoredProcedure",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"storedProcedureName": "[dbo].[SP_ETL_DATA_INSERT_LOG]",
-								"storedProcedureParameters": {
-									"err_mesg": {
-										"value": {
-											"value": "@activity('UPSERT').output.errors[0].Message",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
-									"load_cnt": {
-										"value": {
-											"value": "@activity('UPSERT').output.rowsRead",
-											"type": "Expression"
-										},
-										"type": "Decimal"
-									},
-									"parm_from": {
-										"value": null,
-										"type": "String"
-									},
-									"parm_to": {
-										"value": null,
-										"type": "String"
-									},
-									"pgm_status": {
-										"value": "E",
-										"type": "String"
-									},
-									"run_pgm": {
-										"value": {
-											"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.firstRow.synapse_object_schema,'.',activity('GET_CFG').output.firstRow.synapse_object)",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
-									"st_date": {
-										"value": {
-											"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
-											"type": "Expression"
-										},
-										"type": "DateTime"
-									},
-									"tgt_job_area": {
-										"value": "ODS",
-										"type": "String"
-									}
-								}
-							}
+					"notebookPath": "/Shared/databricks_ls_poc/#_PoC_Assets/Ingestion/UPSERT",
+					"baseParameters": {
+						"source": {
+							"value": "@{activity('GET_CFG').output.firstRow.source}",
+							"type": "Expression"
+						},
+						"source_object": {
+							"value": "@{activity('GET_CFG').output.firstRow.source_object}\n",
+							"type": "Expression"
+						},
+						"synapse_object_schema": {
+							"value": "@{activity('GET_CFG').output.firstRow.synapse_object_schema}",
+							"type": "Expression"
+						},
+						"synapse_object": {
+							"value": "@{activity('GET_CFG').output.firstRow.synapse_object}",
+							"type": "Expression"
+						},
+						"yyyyMMddHHmmss": {
+							"value": "@{activity('GET_CFG').output.firstRow.yyyyMMddHHmmss}",
+							"type": "Expression"
 						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "SUCCESS",
-							"type": "SqlServerStoredProcedure",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"storedProcedureName": "[dbo].[SP_ETL_DATA_INSERT_LOG]",
-								"storedProcedureParameters": {
-									"err_mesg": {
-										"value": null,
-										"type": "String"
-									},
-									"load_cnt": {
-										"value": {
-											"value": "@activity('UPSERT').output.rowsCopied",
-											"type": "Expression"
-										},
-										"type": "Decimal"
-									},
-									"parm_from": {
-										"value": null,
-										"type": "String"
-									},
-									"parm_to": {
-										"value": null,
-										"type": "String"
-									},
-									"pgm_status": {
-										"value": "S",
-										"type": "String"
-									},
-									"run_pgm": {
-										"value": {
-											"value": "@concat('BRIDGE','_','SYN','_',activity('GET_CFG').output.firstRow.synapse_object_schema,'.',activity('GET_CFG').output.firstRow.synapse_object)",
-											"type": "Expression"
-										},
-										"type": "String"
-									},
-									"st_date": {
-										"value": {
-											"value": "@formatDateTime(concat(substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,0,4),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,4,2),'-',substring(activity('GET_CFG').output.firstRow.yyyyMMddHHmmss,6,2)),'yyyy-MM-dd')",
-											"type": "Expression"
-										},
-										"type": "DateTime"
-									},
-									"tgt_job_area": {
-										"value": "ODS",
-										"type": "String"
-									}
-								}
-							}
-						}
-					]
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks1",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
