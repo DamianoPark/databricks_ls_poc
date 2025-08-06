@@ -3,10 +3,35 @@
 	"properties": {
 		"activities": [
 			{
+				"name": "GET_TIME",
+				"description": "This activity is used to initialize TIME variable with pipeline start time",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "TIME",
+					"value": {
+						"value": "@replace(replace(pipeline().parameters.WIND_STRT_TIME,':',''),'-','')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
 				"name": "GET_CFG",
 				"description": "Get migration table information from configuration table",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "GET_TIME",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -173,6 +198,10 @@
 			"DLS_URL": {
 				"type": "string",
 				"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
+			},
+			"WIND_STRT_TIME": {
+				"type": "string",
+				"defaultValue": "20250806T123456"
 			}
 		},
 		"variables": {
