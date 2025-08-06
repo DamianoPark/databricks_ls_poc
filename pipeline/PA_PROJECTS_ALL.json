@@ -181,6 +181,10 @@
 						"yyyyMMddHHmmss": {
 							"value": "@{activity('GET_CFG').output.firstRow.yyyyMMddHHmmss}",
 							"type": "Expression"
+						},
+						"time": {
+							"value": "@variables('TIME')",
+							"type": "Expression"
 						}
 					}
 				},
