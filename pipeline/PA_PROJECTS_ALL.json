@@ -77,7 +77,7 @@
 					"sink": {
 						"type": "AzureBlobFSSink"
 					},
-					"enableStaging": true
+					"enableStaging": false
 				},
 				"inputs": [
 					{
