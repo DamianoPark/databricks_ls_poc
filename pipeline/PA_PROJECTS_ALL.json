@@ -70,11 +70,9 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "OracleSource",
-						"partitionOption": "None",
-						"numberPrecision": 38,
-						"numberScale": 18,
-						"queryTimeout": "02:00:00"
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "AzureBlobFSSink"
@@ -83,8 +81,16 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "OracleTable1",
-						"type": "DatasetReference"
+						"referenceName": "DS_FRW_ASQL_TBL",
+						"type": "DatasetReference",
+						"parameters": {
+							"SRC_SRV_NM": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+							"SRC_DB_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+							"SRC_USER_NM": "@pipeline().globalParameters.GP_META_USER_NM",
+							"SRC_DB_KVS_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+							"SCHEMA_NM": "@{activity('GET_CFG').output.firstRow.source_object_schema}",
+							"TBL_NM": "@{activity('GET_CFG').output.firstRow.source_object}"
+						}
 					}
 				],
 				"outputs": [
