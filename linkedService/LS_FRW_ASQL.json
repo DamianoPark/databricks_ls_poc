@@ -30,6 +30,10 @@
 					"type": "Expression"
 				}
 			}
+		},
+		"connectVia": {
+			"referenceName": "ls-dp-adf-ir-new",
+			"type": "IntegrationRuntimeReference"
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/linkedservices"
