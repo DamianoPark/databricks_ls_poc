@@ -1,8 +1,8 @@
 {
-	"name": "SqlServerTable1",
+	"name": "OracleTable1",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "RMS_wcadmin",
+			"referenceName": "ERP_ERPPROD",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
@@ -14,17 +14,11 @@
 			}
 		},
 		"annotations": [],
-		"type": "SqlServerTable",
+		"type": "OracleTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": {
-				"value": "@dataset().SCHEMA_NM",
-				"type": "Expression"
-			},
-			"table": {
-				"value": "@dataset().TBL_NM",
-				"type": "Expression"
-			}
+			"schema": "@dataset.SCHEMA_NM",
+			"table": "@dataset().TBL_NM"
 		}
 	}
 }
