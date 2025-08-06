@@ -70,7 +70,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "AzureSqlSource",
+						"type": "SqlServerSource",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -81,34 +81,8 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DS_FRW_ASQL_TBL",
-						"type": "DatasetReference",
-						"parameters": {
-							"SRC_SRV_NM": {
-								"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_NM": {
-								"value": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
-								"type": "Expression"
-							},
-							"SRC_USER_NM": {
-								"value": "@pipeline().globalParameters.GP_META_USER_NM",
-								"type": "Expression"
-							},
-							"SRC_DB_KVS_NM": {
-								"value": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
-								"type": "Expression"
-							},
-							"SCHEMA_NM": {
-								"value": "@{activity('GET_CFG').output.firstRow.source_object_schema}",
-								"type": "Expression"
-							},
-							"TBL_NM": {
-								"value": "@{activity('GET_CFG').output.firstRow.source_object}",
-								"type": "Expression"
-							}
-						}
+						"referenceName": "SqlServerTable1",
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
