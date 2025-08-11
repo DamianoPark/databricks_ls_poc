@@ -30,7 +30,7 @@
 							"type": "FileServerReadSettings",
 							"recursive": true,
 							"modifiedDatetimeStart": {
-								"value": "@addminutes(utcnow(), -7200)",
+								"value": "@addminutes(utcnow(), -2)",
 								"type": "Expression"
 							},
 							"wildcardFileName": "*.csv",
