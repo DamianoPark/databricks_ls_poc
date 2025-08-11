@@ -7,6 +7,10 @@
 			"metadata": "Data Factory 이름",
 			"defaultValue": "databricks-ls-poc-datafactory"
 		},
+		"AzureDatabricks1_accessToken": {
+			"type": "secureString",
+			"metadata": "'AzureDatabricks1'의 'accessToken'에 대한 보안 문자열"
+		},
 		"AzureDatabricksDeltaLake_ADF_accessToken": {
 			"type": "secureString",
 			"metadata": "'AzureDatabricksDeltaLake_ADF'의 'accessToken'에 대한 보안 문자열"
@@ -39,6 +43,10 @@
 		"RMS_wcadmin_password": {
 			"type": "secureString",
 			"metadata": "'RMS_wcadmin'의 'password'에 대한 보안 문자열"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0723-100254-n2kv7yck"
 		},
 		"AzureKeyVault1_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -117,6 +125,24 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricks1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-349757441074007.7.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricks1_accessToken')]"
+					},
+					"existingClusterId": "[parameters('AzureDatabricks1_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake_ADF')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -727,119 +753,65 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/DS_SRC_NAS_FS2')]",
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ASQL_TBL')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "LS_NAS",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "DS_TEMP_MONITORING/File System"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "FileServerLocation",
-						"folderPath": "테스트"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "No.",
-						"type": "String"
-					},
-					{
-						"name": " Date&Time",
-						"type": "String"
-					},
-					{
-						"name": " ms",
-						"type": "String"
-					},
-					{
-						"name": "CH1",
-						"type": "String"
-					},
-					{
-						"name": "CH2",
-						"type": "String"
-					},
-					{
-						"name": "CH3",
-						"type": "String"
-					},
-					{
-						"name": "CH4",
-						"type": "String"
-					},
-					{
-						"name": "CH5",
-						"type": "String"
-					},
-					{
-						"name": "CH6",
-						"type": "String"
-					},
-					{
-						"name": "CH7",
-						"type": "String"
-					},
-					{
-						"name": "CH8",
-						"type": "String"
-					},
-					{
-						"name": "CH9",
-						"type": "String"
-					},
-					{
-						"name": "CH10",
-						"type": "String"
-					},
-					{
-						"name": "Alarm1",
-						"type": "String"
-					},
-					{
-						"name": "Alarm2",
-						"type": "String"
-					},
-					{
-						"name": "AlarmOut",
-						"type": "String"
+					"referenceName": "LS_FRW_ASQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SRC_SRV_NM": "@dataset().SRC_SRV_NM",
+						"SRC_DB_NM": {
+							"value": "@dataset().SRC_DB_NM",
+							"type": "Expression"
+						},
+						"SRC_USER_NM": {
+							"value": "@dataset().SRC_USER_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_KVS_NM": {
+							"value": "@dataset().SRC_DB_KVS_NM",
+							"type": "Expression"
+						}
 					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_NAS')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ERP_Oracle')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ERP_ERPPROD",
-					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					},
+					"SCHEMA_NM": {
+						"type": "string"
+					},
+					"TBL_NM": {
+						"type": "string"
+					}
 				},
 				"annotations": [],
-				"type": "OracleTable",
+				"type": "AzureSqlTable",
 				"schema": [],
 				"typeProperties": {
-					"schema": "ECST",
-					"table": "ECST_SALES_DETAILS"
+					"schema": {
+						"value": "@dataset().SCHEMA_NM",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TBL_NM",
+						"type": "Expression"
+					}
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ERP_ERPPROD')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_FRW_ASQL')]"
 			]
 		}
 	]

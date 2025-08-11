@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "databricks-ls-poc-datafactory"
 		},
+		"AzureDatabricks1_accessToken": {
+			"value": ""
+		},
 		"AzureDatabricksDeltaLake_ADF_accessToken": {
 			"value": ""
 		},
@@ -34,6 +37,9 @@
 		},
 		"DS_FRW_ADLS_ALL_properties_typeProperties_folderPath": {
 			"value": "@dataset().DLS_DR"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"value": "0723-100254-n2kv7yck"
 		},
 		"AzureKeyVault1_properties_typeProperties_baseUrl": {
 			"value": "https://kv-lse-datawarehouse.vault.azure.net/"

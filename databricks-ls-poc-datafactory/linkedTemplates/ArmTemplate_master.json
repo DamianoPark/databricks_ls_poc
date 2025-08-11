@@ -7,6 +7,10 @@
 			"metadata": "Data Factory 이름",
 			"defaultValue": "databricks-ls-poc-datafactory"
 		},
+		"AzureDatabricks1_accessToken": {
+			"type": "secureString",
+			"metadata": "'AzureDatabricks1'의 'accessToken'에 대한 보안 문자열"
+		},
 		"AzureDatabricksDeltaLake_ADF_accessToken": {
 			"type": "secureString",
 			"metadata": "'AzureDatabricksDeltaLake_ADF'의 'accessToken'에 대한 보안 문자열"
@@ -47,6 +51,10 @@
 		"DS_FRW_ADLS_ALL_properties_typeProperties_folderPath": {
 			"type": "string",
 			"defaultValue": "@dataset().DLS_DR"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0723-100254-n2kv7yck"
 		},
 		"AzureKeyVault1_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -139,6 +147,9 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"AzureDatabricks1_accessToken": {
+						"value": "[parameters('AzureDatabricks1_accessToken')]"
+					},
 					"AzureDatabricksDeltaLake_ADF_accessToken": {
 						"value": "[parameters('AzureDatabricksDeltaLake_ADF_accessToken')]"
 					},
@@ -162,6 +173,9 @@
 					},
 					"RMS_wcadmin_password": {
 						"value": "[parameters('RMS_wcadmin_password')]"
+					},
+					"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('AzureDatabricks1_properties_typeProperties_existingClusterId')]"
 					},
 					"AzureKeyVault1_properties_typeProperties_baseUrl": {
 						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"

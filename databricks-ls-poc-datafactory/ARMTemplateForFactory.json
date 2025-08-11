@@ -7,6 +7,10 @@
 			"metadata": "Data Factory 이름",
 			"defaultValue": "databricks-ls-poc-datafactory"
 		},
+		"AzureDatabricks1_accessToken": {
+			"type": "secureString",
+			"metadata": "'AzureDatabricks1'의 'accessToken'에 대한 보안 문자열"
+		},
 		"AzureDatabricksDeltaLake_ADF_accessToken": {
 			"type": "secureString",
 			"metadata": "'AzureDatabricksDeltaLake_ADF'의 'accessToken'에 대한 보안 문자열"
@@ -47,6 +51,10 @@
 		"DS_FRW_ADLS_ALL_properties_typeProperties_folderPath": {
 			"type": "string",
 			"defaultValue": "@dataset().DLS_DR"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0723-100254-n2kv7yck"
 		},
 		"AzureKeyVault1_properties_typeProperties_baseUrl": {
 			"type": "string",
@@ -3310,7 +3318,7 @@
 							"source": {
 								"type": "OracleSource",
 								"oracleReaderQuery": {
-									"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}\nWHERE @{pipeline().parameters.source_object}.@{split(activity('GET_CFG').output.value[0].target_field,',')[0]} >= TO_DATE(@{pipeline().parameters.FROM})\nAND\n@{pipeline().parameters.source_object}.@{split(activity('GET_CFG').output.value[0].target_field,',')[1]} <= TO_DATE(@{pipeline().parameters.TO})\n",
+									"value": "SELECT * \nFROM @{pipeline().parameters.source_object_schema}.@{pipeline().parameters.source_object}\nWHERE TO_DATE(@{split(activity('GET_CFG').output.value[0].target_field,',')[0]} , 'YYYY-MM') >= TO_DATE(@{pipeline().parameters.FROM}, 'YYYY-MM')\nAND TO_DATE(@{split(activity('GET_CFG').output.value[0].target_field,',')[1]} , 'YYYY-MM') <= TO_DATE(@{pipeline().parameters.TO}, 'YYYY-MM')",
 									"type": "Expression"
 								},
 								"partitionOption": "None",
@@ -3773,6 +3781,14 @@
 								"IF_ID": {
 									"value": "@variables('IF_ID')",
 									"type": "Expression"
+								},
+								"FROM": {
+									"value": "@variables('FROM')",
+									"type": "Expression"
+								},
+								"TO": {
+									"value": "@variables('TO')",
+									"type": "Expression"
 								}
 							}
 						}
@@ -3815,12 +3831,12 @@
 						"defaultValue": "ECST_SALES_DETAILS"
 					},
 					"FROM": {
-						"type": "String",
-						"defaultValue": "202501"
+						"type": "Integer",
+						"defaultValue": 202501
 					},
 					"TO": {
-						"type": "String",
-						"defaultValue": "202508"
+						"type": "Integer",
+						"defaultValue": 202508
 					}
 				},
 				"folder": {
@@ -5060,6 +5076,242 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PA_PROJECTS_ALL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GET_TIME",
+						"description": "This activity is used to initialize TIME variable with pipeline start time",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "TIME",
+							"value": {
+								"value": "@replace(replace(pipeline().parameters.WIND_STRT_TIME,':',''),'-','')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "GET_CFG",
+						"description": "Get migration table information from configuration table",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "GET_TIME",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT [load_id]\n      ,[source_name]\n      ,[source]\n      ,[interface_id]\n      ,[interface_name]\n      ,[load_type]\n      ,[source_object_schema]\n      ,[source_object]\n      ,[source_field]\n      ,[source_condition]\n      ,[target_object_schema]\n      ,[target_object]\n      ,[target_field]\n      ,[target_condition]\n      ,[from]\n      ,[to]\n      ,[interval_type]\n      ,[r_mig_flg]\n      ,[b_mig_flg]\n      ,[c_mig_flg]\n      ,[usecase_id]\n      ,[src_sys_id]\n      ,[trigger_id]\n      ,[rest_call_url]\n      ,[synapse_object_schema]\n      ,[synapse_object]\n      ,[synapse_object_type]\n      ,NEWID() as ID \n      ,FORMAT(cast(DATEADD(HOUR,9,GETUTCDATE()) as datetime), 'yyyyMMddHHmmss') as 'yyyyMMddHHmmss'\n  FROM [META].[LOAD_INV_EAI]\n  WHERE 1=1\n  AND [interface_id] = '@{variables('IF_ID')}'",
+									"type": "Expression"
+								},
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_FRW_ASQL_ALL",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_NM",
+										"type": "Expression"
+									},
+									"SRC_USER_NM": {
+										"value": "@pipeline().globalParameters.GP_META_USER_NM",
+										"type": "Expression"
+									},
+									"SRC_DB_KVS_NM": {
+										"value": "@pipeline().globalParameters.GP_META_DB_KVS_NM",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "COPY_TO_ADLS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "GET_CFG",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureBlobFSSink"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_FRW_ASQL_TBL",
+								"type": "DatasetReference",
+								"parameters": {
+									"SRC_SRV_NM": "@pipeline().globalParameters.GP_META_DB_SRV_NM",
+									"SRC_DB_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_NM",
+									"SRC_USER_NM": "@pipeline().globalParameters.GP_META_USER_NM",
+									"SRC_DB_KVS_NM": "@pipeline().globalParameters.GP_BRIDGE_DB_KVS_NM",
+									"SCHEMA_NM": "@{activity('GET_CFG').output.firstRow.source_object_schema}",
+									"TBL_NM": "@{activity('GET_CFG').output.firstRow.source_object}"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_FRW_ADLS_ALL",
+								"type": "DatasetReference",
+								"parameters": {
+									"DLS_DR": {
+										"value": "@{pipeline().parameters.DL_DR_NM}/@{activity('GET_CFG').output.firstRow.source_name}/@{activity('GET_CFG').output.firstRow.source}/@{activity('GET_CFG').output.firstRow.source_object}-ALL/@{variables('TIME')}",
+										"type": "Expression"
+									},
+									"DLS_FN": {
+										"value": "@{activity('GET_CFG').output.firstRow.source_object}.tsv",
+										"type": "Expression"
+									},
+									"DLS_URL": "@pipeline().parameters.DLS_URL"
+								}
+							}
+						]
+					},
+					{
+						"name": "UPSERT_and_LOG",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "COPY_TO_ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Shared/databricks_ls_poc/#_PoC_Assets/Ingestion/UPSERT",
+							"baseParameters": {
+								"source": {
+									"value": "@{activity('GET_CFG').output.firstRow.source}",
+									"type": "Expression"
+								},
+								"source_object_schema": {
+									"value": "@{activity('GET_CFG').output.firstRow.source_object_schema}",
+									"type": "Expression"
+								},
+								"source_object": {
+									"value": "@{activity('GET_CFG').output.firstRow.source_object}",
+									"type": "Expression"
+								},
+								"synapse_object_schema": {
+									"value": "@{activity('GET_CFG').output.firstRow.synapse_object_schema}",
+									"type": "Expression"
+								},
+								"synapse_object": {
+									"value": "@{activity('GET_CFG').output.firstRow.synapse_object}",
+									"type": "Expression"
+								},
+								"yyyyMMddHHmmss": {
+									"value": "@{activity('GET_CFG').output.firstRow.yyyyMMddHHmmss}",
+									"type": "Expression"
+								},
+								"time": {
+									"value": "@variables('TIME')",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricks1",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"DL_DR_NM": {
+						"type": "string",
+						"defaultValue": "bronze"
+					},
+					"DLS_URL": {
+						"type": "string",
+						"defaultValue": "https://databrickslspocsa.dfs.core.windows.net/"
+					},
+					"WIND_STRT_TIME": {
+						"type": "string",
+						"defaultValue": "20250806T123456"
+					}
+				},
+				"variables": {
+					"IF_ID": {
+						"type": "String",
+						"defaultValue": "IF_SRD_DPS_ERP_0010"
+					},
+					"TIME": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "2ND PROJECT/1. EAI/ERP/UPSERT/yyyyMMdd"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_FRW_ASQL_ALL')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FRW_ASQL_TBL')]",
+				"[concat(variables('factoryId'), '/datasets/DS_FRW_ADLS_ALL')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricks1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/RA_TERRITORIES_TL')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -5582,6 +5834,68 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_FRW_ASQL_TBL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_FRW_ASQL",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SRC_SRV_NM": "@dataset().SRC_SRV_NM",
+						"SRC_DB_NM": {
+							"value": "@dataset().SRC_DB_NM",
+							"type": "Expression"
+						},
+						"SRC_USER_NM": {
+							"value": "@dataset().SRC_USER_NM",
+							"type": "Expression"
+						},
+						"SRC_DB_KVS_NM": {
+							"value": "@dataset().SRC_DB_KVS_NM",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"SRC_SRV_NM": {
+						"type": "string"
+					},
+					"SRC_DB_NM": {
+						"type": "string"
+					},
+					"SRC_USER_NM": {
+						"type": "string"
+					},
+					"SRC_DB_KVS_NM": {
+						"type": "string"
+					},
+					"SCHEMA_NM": {
+						"type": "string"
+					},
+					"TBL_NM": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SCHEMA_NM",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TBL_NM",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_FRW_ASQL')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_SRC_NAS_FS2')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -5698,6 +6012,76 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/OracleTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ERP_ERPPROD",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SCHEMA_NM": {
+						"type": "string"
+					},
+					"TBL_NM": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "OracleTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset.SCHEMA_NM",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TBL_NM",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ERP_ERPPROD')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "RMS_wcadmin",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"SCHEMA_NM": {
+						"type": "string"
+					},
+					"TBL_NM": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().SCHEMA_NM",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TBL_NM",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/RMS_wcadmin')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/copytoadls')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -5723,6 +6107,24 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/databrickslspocsa')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricks1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-349757441074007.7.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricks1_accessToken')]"
+					},
+					"existingClusterId": "[parameters('AzureDatabricks1_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake_ADF')]",
@@ -5977,7 +6379,7 @@
 			"properties": {
 				"description": "분마다 Origin_PL_COPY_FS_to_BLOB_v4_PC2 트리",
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
