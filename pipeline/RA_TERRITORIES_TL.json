@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "GET_CFG_copy1",
+				"name": "GET_CFG",
 				"description": "Get migration table information from configuration table",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -50,11 +50,11 @@
 				}
 			},
 			{
-				"name": "WORKFLOW_copy1",
+				"name": "WORKFLOW",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "GET_CFG_copy1",
+						"activity": "GET_CFG",
 						"dependencyConditions": [
 							"Succeeded"
 						]
